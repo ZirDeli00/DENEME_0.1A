@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hakan ÇELİK - Yapay Zeka Sohbet</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .app {
+      width: min(900px, 95vw);
+      height: min(700px, 95vh);
+      background: #111827;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+    }
+    header {
+      padding: 14px 18px;
+      border-bottom: 1px solid #334155;
+      font-weight: bold;
+      font-size: 1.1rem;
+      background: #1e293b;
+    }
+    #chat {
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .msg {
+      max-width: 75%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+    .user {
+      margin-left: auto;
+      background: #0ea5e9;
+      color: #082f49;
+    }
+    .bot {
+      margin-right: auto;
+      background: #1f2937;
+      border: 1px solid #334155;
+    }
+    form {
+      border-top: 1px solid #334155;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 12px;
+      background: #1e293b;
+    }
+    input {
+      font-size: 1rem;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      background: #22c55e;
+      color: #052e16;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>Hakan ÇELİK - Yapay Zeka Sohbet</header>
+    <div id="chat"></div>
+    <form id="chatForm">
+      <input id="prompt" type="text" placeholder="Mesajınızı yazın..." autocomplete="off" required />
+      <button type="submit">Gönder</button>
+    </form>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const form = document.getElementById('chatForm');
+    const promptInput = document.getElementById('prompt');
+
+    const rules = [
+      { keys: ['merhaba', 'selam'], reply: 'Merhaba! Ben Hakan ÇELİK sohbet asistanıyım. Size nasıl yardımcı olabilirim?' },
+      { keys: ['nasılsın'], reply: 'Teşekkür ederim, gayet iyiyim. Siz nasılsınız?' },
+      { keys: ['adın ne', 'ismin ne'], reply: 'Benim adım Hakan ÇELİK için hazırlanmış yerel yapay zeka sohbet botu.' },
+      { keys: ['yardım', 'neler yapabilirsin'], reply: 'Sorularınızı yanıtlayabilir, fikir üretebilir ve genel sohbet edebilirim.' },
+      { keys: ['teşekkür'], reply: 'Rica ederim! Yardımcı olabildiysem ne mutlu bana.' },
+      { keys: ['görüşürüz', 'hoşça kal'], reply: 'Görüşmek üzere! İstediğiniz zaman tekrar yazabilirsiniz.' }
+    ];
+
+    function addMessage(text, role) {
+      const div = document.createElement('div');
+      div.className = `msg ${role}`;
+      div.textContent = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function aiReply(text) {
+      const normalized = text.toLocaleLowerCase('tr-TR');
+      for (const rule of rules) {
+        if (rule.keys.some(k => normalized.includes(k))) return rule.reply;
+      }
+      return 'Bunu anladım: "' + text + '"\nDaha detay verirseniz daha iyi yardımcı olabilirim.';
+    }
+
+    addMessage('Merhaba! Ben Hakan ÇELİK sohbet botuyum. Sohbete başlayabilirsiniz.', 'bot');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = promptInput.value.trim();
+      if (!text) return;
+      addMessage(text, 'user');
+      promptInput.value = '';
+      setTimeout(() => addMessage(aiReply(text), 'bot'), 250);
+    });
+  </script>
+</body>
+</html>
