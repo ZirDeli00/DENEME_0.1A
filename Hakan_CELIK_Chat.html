@@ -8,8 +8,8 @@
     :root {
       color-scheme: dark;
       --bg: #070b18;
-      --panel: rgba(17, 24, 39, 0.82);
-      --panel-soft: rgba(30, 41, 59, 0.78);
+      --panel: rgba(17, 24, 39, 0.84);
+      --panel-soft: rgba(30, 41, 59, 0.8);
       --border: rgba(148, 163, 184, 0.25);
       --text: #e2e8f0;
       --muted: #94a3b8;
@@ -20,7 +20,6 @@
     }
 
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
       min-height: 100vh;
@@ -30,21 +29,21 @@
       place-items: center;
       background:
         radial-gradient(circle at 15% 20%, #1d4ed8 0%, transparent 35%),
-        radial-gradient(circle at 80% 0%, #7c3aed 0%, transparent 40%),
+        radial-gradient(circle at 85% 0%, #7c3aed 0%, transparent 40%),
         var(--bg);
       padding: 20px;
     }
 
     .app {
-      width: min(960px, 100%);
-      height: min(760px, calc(100vh - 40px));
+      width: min(980px, 100%);
+      height: min(780px, calc(100vh - 40px));
       border-radius: 20px;
       border: 1px solid var(--border);
       background: var(--panel);
       box-shadow: 0 24px 80px rgba(2, 6, 23, 0.55);
       backdrop-filter: blur(10px);
       display: grid;
-      grid-template-rows: auto auto 1fr auto;
+      grid-template-rows: auto auto 1fr auto auto;
       overflow: hidden;
     }
 
@@ -57,27 +56,11 @@
       background: linear-gradient(90deg, rgba(34, 211, 238, 0.12), rgba(167, 139, 250, 0.12));
     }
 
-    .title {
-      font-size: 1.12rem;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-    }
+    .title { font-size: 1.1rem; font-weight: 700; }
+    .subtitle { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 12px #4ade80; }
 
-    .subtitle {
-      color: var(--muted);
-      font-size: 0.82rem;
-      margin-top: 2px;
-    }
-
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #4ade80;
-      box-shadow: 0 0 12px #4ade80;
-    }
-
-    .quick-actions {
+    .quick-actions, .toolbar {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
@@ -86,7 +69,9 @@
       background: var(--panel-soft);
     }
 
-    .chip {
+    .toolbar { justify-content: space-between; align-items: center; }
+
+    .chip, .tool-btn {
       border: 1px solid rgba(56, 189, 248, 0.35);
       background: rgba(30, 41, 59, 0.8);
       color: #cbd5e1;
@@ -94,112 +79,80 @@
       border-radius: 999px;
       font-size: 0.82rem;
       cursor: pointer;
-      transition: 0.15s ease;
     }
 
-    .chip:hover {
-      border-color: rgba(34, 211, 238, 0.8);
-      transform: translateY(-1px);
-      color: #e2e8f0;
-    }
+    .tool-btn { border-radius: 10px; }
+    .chip:hover, .tool-btn:hover { border-color: rgba(34, 211, 238, 0.9); color: #fff; }
 
-    #chat {
-      padding: 18px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .row {
-      display: flex;
-      gap: 9px;
-      align-items: flex-end;
-      max-width: 88%;
-    }
-
-    .row.user-row {
-      margin-left: auto;
-      flex-direction: row-reverse;
-    }
-
+    #chat { padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .row { display: flex; gap: 9px; align-items: flex-end; max-width: 92%; }
+    .row.user-row { margin-left: auto; flex-direction: row-reverse; }
     .avatar {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: 0.78rem;
-      font-weight: 700;
-      border: 1px solid var(--border);
-      background: rgba(2, 6, 23, 0.7);
-      color: #bfdbfe;
-      flex-shrink: 0;
+      width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+      font-size: 0.75rem; font-weight: 700; border: 1px solid var(--border); background: rgba(2, 6, 23, 0.7);
+      color: #bfdbfe; flex-shrink: 0;
     }
-
-    .user-row .avatar { color: #083344; background: rgba(34, 211, 238, 0.7); }
 
     .msg {
-      padding: 11px 13px;
-      border-radius: 14px;
-      white-space: pre-wrap;
-      line-height: 1.45;
-      border: 1px solid var(--border);
-      box-shadow: 0 8px 24px rgba(2, 6, 23, 0.3);
+      padding: 11px 13px; border-radius: 14px; white-space: pre-wrap; line-height: 1.42;
+      border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(2, 6, 23, 0.3);
     }
 
     .bot { background: var(--bot); }
     .user { background: var(--user); color: #062135; border: none; font-weight: 600; }
+    .typing { color: var(--muted); font-size: 0.85rem; font-style: italic; margin-left: 40px; display: none; }
 
-    .typing {
-      color: var(--muted);
-      font-size: 0.85rem;
-      font-style: italic;
-      margin-left: 40px;
-      display: none;
+    .attachment-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .attachment-item {
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: rgba(2, 6, 23, 0.35);
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 0.78rem;
+      max-width: 220px;
+      overflow-wrap: anywhere;
+    }
+
+    .attachment-item img {
+      width: 100%;
+      max-height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 6px;
     }
 
     form {
       border-top: 1px solid var(--border);
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: auto 1fr auto;
       gap: 10px;
       padding: 14px;
       background: var(--panel-soft);
+      align-items: center;
     }
 
-    input {
-      width: 100%;
-      font-size: 1rem;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      background: rgba(15, 23, 42, 0.88);
-      color: var(--text);
-      outline: none;
+    input[type="text"] {
+      width: 100%; font-size: 1rem; padding: 12px; border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.4); background: rgba(15, 23, 42, 0.88); color: var(--text); outline: none;
     }
 
-    input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.16); }
+    input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.16); }
 
-    button {
-      border: none;
-      border-radius: 10px;
-      padding: 12px 16px;
+    .send-btn {
+      border: none; border-radius: 10px; padding: 12px 16px;
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #03142e;
-      font-weight: 700;
-      cursor: pointer;
+      color: #03142e; font-weight: 700; cursor: pointer;
     }
 
-    .hint {
-      font-size: 0.78rem;
-      color: var(--muted);
-      padding: 0 15px 14px;
-    }
+    .hint { font-size: 0.78rem; color: var(--muted); padding: 0 15px 14px; }
+    .toggle { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.82rem; }
+    .toggle input { accent-color: var(--accent); }
 
-    @media (max-width: 600px) {
-      .row { max-width: 100%; }
+    @media (max-width: 700px) {
       .app { height: calc(100vh - 20px); }
+      .row { max-width: 100%; }
+      form { grid-template-columns: 1fr auto; }
+      #uploadBtn { grid-column: 1 / -1; }
     }
   </style>
 </head>
@@ -208,27 +161,37 @@
     <header>
       <div>
         <div class="title">Hakan ÇELİK - Yapay Zeka Sohbet</div>
-        <div class="subtitle">Gelişmiş yerel anlama motoru • Türkçe optimize</div>
+        <div class="subtitle">Gelişmiş anlama + internet arama destekli asistan</div>
       </div>
       <div class="status-dot" title="Çevrimiçi"></div>
     </header>
 
+    <div class="toolbar">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button type="button" class="tool-btn" id="uploadBtn">📎 Dosya / Fotoğraf Ekle</button>
+        <label class="toggle"><input type="checkbox" id="webMode" checked /> İnternet araması açık</label>
+      </div>
+      <small style="color:var(--muted)">Bilgi yetersizse otomatik web özeti çıkarır.</small>
+    </div>
+
     <div class="quick-actions" id="quickActions">
       <button type="button" class="chip">Benim adım Ahmet</button>
       <button type="button" class="chip">Saat kaç?</button>
-      <button type="button" class="chip">Bugün ne yapabilirim?</button>
+      <button type="button" class="chip">Yapay zeka nedir?</button>
       <button type="button" class="chip">2+5*3 hesapla</button>
-      <button type="button" class="chip">Bana motivasyon ver</button>
+      <button type="button" class="chip">Mars hakkında araştır</button>
     </div>
 
     <div id="chat"></div>
     <div class="typing" id="typing">Hakan ÇELİK düşünüyor...</div>
 
     <form id="chatForm">
+      <button type="button" id="uploadBtn2" class="tool-btn">📁 Ekle</button>
       <input id="prompt" type="text" placeholder="Mesajınızı yazın..." autocomplete="off" required />
-      <button type="submit">Gönder</button>
+      <button class="send-btn" type="submit">Gönder</button>
+      <input id="fileInput" type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xlsx" hidden />
     </form>
-    <div class="hint">İpucu: Adınızı tanıyabilir, basit matematik yapabilir ve önceki mesajlardan bağlam tutabilir.</div>
+    <div class="hint">İpucu: "Araştır: ..." yazarsanız internetten özet + arama bağlantısı üretir. Dosya/fotoğraf yüklemeyi mesaja ekleyebilirsiniz.</div>
   </div>
 
   <script>
@@ -237,12 +200,13 @@
     const promptInput = document.getElementById('prompt');
     const typing = document.getElementById('typing');
     const quickActions = document.getElementById('quickActions');
+    const webMode = document.getElementById('webMode');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadBtn2 = document.getElementById('uploadBtn2');
+    const fileInput = document.getElementById('fileInput');
 
-    const memory = {
-      userName: null,
-      lastTopic: null,
-      lastQuestion: null
-    };
+    const memory = { userName: null, lastTopic: null, lastQuestion: null };
+    let pendingFiles = [];
 
     const knowledge = {
       javascript: 'JavaScript, web uygulamalarının etkileşimli davranışlarını yöneten bir programlama dilidir.',
@@ -258,9 +222,9 @@
         'Disiplin, motivasyonun gelmediği günlerde bile sizi hedefe taşır.'
       ],
       fallback: [
-        'Güzel bir konu açtınız. Bunu biraz daha detaylandırır mısınız?',
-        'Bu konuda yardımcı olabilirim. Neyi özellikle öğrenmek istiyorsunuz?',
-        'Anladım. İsterseniz bunu adım adım birlikte netleştirelim.'
+        'Bu soruyu daha iyi cevaplamak için internet araması yapabilirim. "Araştır: ..." yazar mısınız?',
+        'Anladım. İsterseniz bu konuda web araştırması başlatabilirim.',
+        'Detaylı bilgi için internet araması yapayım mı?'
       ]
     };
 
@@ -273,11 +237,9 @@
         .trim();
     }
 
-    function randomFrom(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
+    function randomFrom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-    function addMessage(text, role) {
+    function addMessage(text, role, attachments = null) {
       const row = document.createElement('div');
       row.className = `row ${role === 'user' ? 'user-row' : 'bot-row'}`;
 
@@ -288,9 +250,30 @@
       const bubble = document.createElement('div');
       bubble.className = `msg ${role}`;
       bubble.textContent = text;
-
       row.appendChild(avatar);
       row.appendChild(bubble);
+
+      if (attachments?.length) {
+        const list = document.createElement('div');
+        list.className = 'attachment-list';
+        attachments.forEach((file) => {
+          const item = document.createElement('div');
+          item.className = 'attachment-item';
+          if (file.type.startsWith('image/')) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.alt = file.name;
+            item.appendChild(img);
+          }
+          const info = document.createElement('div');
+          info.textContent = `${file.name} (${Math.max(1, Math.round(file.size / 1024))} KB)`;
+          item.appendChild(info);
+          list.appendChild(item);
+        });
+        bubble.appendChild(document.createElement('br'));
+        bubble.appendChild(list);
+      }
+
       chat.appendChild(row);
       chat.scrollTop = chat.scrollHeight;
     }
@@ -311,8 +294,38 @@
         if (!Number.isFinite(result)) return 'Bu işlemde geçerli bir sonuç çıkmadı.';
         return `Sonuç: ${result}`;
       } catch {
-        return 'İşlemi çözerken bir hata oldu. Örneğin: 12/(3+1) şeklinde yazabilirsiniz.';
+        return 'İşlemi çözerken bir hata oldu. Örnek: 12/(3+1) şeklinde yazabilirsiniz.';
       }
+    }
+
+    function needsWebSearch(normalized) {
+      return /^(arastir|ara|search|googlela|internetten)|\b(nedir|kimdir|haber|son durum|karsilastir|detayli anlat)\b/.test(normalized);
+    }
+
+    async function getWebSummary(query) {
+      const wikiUrl = `https://tr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+      try {
+        const response = await fetch(wikiUrl, { headers: { accept: 'application/json' } });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.extract) return { source: 'Vikipedi', text: data.extract };
+        }
+      } catch {
+        // sessiz fallback
+      }
+
+      try {
+        const ddgUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_redirect=1&no_html=1`;
+        const response = await fetch(ddgUrl);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.AbstractText) return { source: 'DuckDuckGo', text: data.AbstractText };
+        }
+      } catch {
+        // sessiz fallback
+      }
+
+      return null;
     }
 
     function getIntent(normalized, rawText) {
@@ -327,10 +340,11 @@
       if (parseUserName(rawText)) return 'set_name';
       if (/(hesapla|kac eder|\d+\s*[+\-*/])/.test(normalized)) return 'calculate';
       if (/(javascript|python|yapay zeka|turkiye)/.test(normalized)) return 'knowledge';
+      if (needsWebSearch(normalized)) return 'web_search';
       return 'fallback';
     }
 
-    function replyTo(rawText) {
+    async function replyTo(rawText) {
       const normalized = normalizeText(rawText);
       const intent = getIntent(normalized, rawText);
       memory.lastQuestion = rawText;
@@ -347,21 +361,13 @@
           : 'Henüz adınızı söylemediniz. "Benim adım ..." diye yazabilirsiniz.';
       }
 
-      if (intent === 'greet') return `Merhaba${memory.userName ? ' ' + memory.userName : ''}! Ben Hakan ÇELİK. Sohbet etmeye hazırım.`;
-      if (intent === 'mood') return 'Harikayım, teşekkür ederim! İsterseniz bugün bir konu seçip birlikte ilerleyelim.';
-
-      if (intent === 'time') {
-        const now = new Date();
-        return `Şu an saat ${now.toLocaleTimeString('tr-TR')}.`;
-      }
-
-      if (intent === 'date') {
-        const now = new Date();
-        return `Bugünün tarihi: ${now.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}.`;
-      }
+      if (intent === 'greet') return `Merhaba${memory.userName ? ' ' + memory.userName : ''}! Ben Hakan ÇELİK. Size yardımcı olmaya hazırım.`;
+      if (intent === 'mood') return 'Harikayım, teşekkür ederim! İsterseniz bir konu seçin, birlikte ilerleyelim.';
+      if (intent === 'time') return `Şu an saat ${new Date().toLocaleTimeString('tr-TR')}.`;
+      if (intent === 'date') return `Bugünün tarihi: ${new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}.`;
 
       if (intent === 'help') {
-        return 'Yapabildiklerim:\n• Genel sohbet\n• Adınızı hatırlama\n• Saat/tarih söyleme\n• Basit matematik işlemleri\n• Kısa bilgi kartları (Python, JavaScript, yapay zeka vb.)\n• Motivasyon ve küçük espriler';
+        return 'Yapabildiklerim:\n• Gelişmiş sohbet ve niyet algılama\n• Adınızı hatırlama\n• Saat/tarih\n• Basit matematik\n• Dosya/fotoğraf ekleme\n• Gerektiğinde internetten bilgi özeti + arama motoru bağlantısı';
       }
 
       if (intent === 'motivation') return randomFrom(answerPools.motivation);
@@ -382,36 +388,62 @@
       }
 
       if ((/daha fazla|detay|ac/.test(normalized)) && memory.lastTopic && knowledge[memory.lastTopic]) {
-        return `${knowledge[memory.lastTopic]}\nDetay isterseniz örneklerle de anlatabilirim.`;
+        return `${knowledge[memory.lastTopic]}\nDetay isterseniz internetten güncel bilgi de çekebilirim.`;
+      }
+
+      if ((intent === 'web_search' || webMode.checked) && rawText.length > 3) {
+        const cleanedQuery = rawText.replace(/^(ara[şs]t[ıi]r|ara|search|googlela)\s*:?/i, '').trim() || rawText;
+        const summary = await getWebSummary(cleanedQuery);
+        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(cleanedQuery)}`;
+        window.open(searchUrl, '_blank', 'noopener');
+
+        if (summary) {
+          return `İnternette kısa araştırma yaptım (${summary.source}):\n${summary.text}\n\nAyrıca detay için arama motorunu açtım: ${searchUrl}`;
+        }
+        return `Sorunuz için arama motorunu açtım: ${searchUrl}\nİsterseniz bulduğunuz sonuçlara göre birlikte özet çıkarabilirim.`;
       }
 
       return randomFrom(answerPools.fallback);
     }
 
-    function sendMessage(text) {
-      addMessage(text, 'user');
+    async function sendMessage(text) {
+      const attachments = pendingFiles.length ? [...pendingFiles] : null;
+      addMessage(text, 'user', attachments);
+      pendingFiles = [];
+      fileInput.value = '';
+
       typing.style.display = 'block';
-      setTimeout(() => {
-        typing.style.display = 'none';
-        addMessage(replyTo(text), 'bot');
-      }, 300 + Math.floor(Math.random() * 300));
+      const response = await replyTo(text);
+      typing.style.display = 'none';
+      addMessage(response, 'bot');
     }
 
-    addMessage('Merhaba! Ben Hakan ÇELİK. Daha iyi anlama ve konuşma yeteneğiyle size yardımcı olmak için buradayım.', 'bot');
+    function onFilesPicked(files) {
+      if (!files.length) return;
+      pendingFiles = files.slice(0, 5);
+      const names = pendingFiles.map((f) => `• ${f.name}`).join('\n');
+      addMessage(`Yüklenecek dosyalar hazır:\n${names}`, 'bot');
+    }
 
-    form.addEventListener('submit', (e) => {
+    addMessage('Merhaba! Ben Hakan ÇELİK. Sorularınızı daha iyi anlayıp gerekirse internet aramasıyla destekleyebilirim.', 'bot');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const text = promptInput.value.trim();
-      if (!text) return;
+      if (!text && !pendingFiles.length) return;
       promptInput.value = '';
-      sendMessage(text);
+      await sendMessage(text || 'Ek dosya gönderiyorum.');
     });
 
-    quickActions.addEventListener('click', (e) => {
+    quickActions.addEventListener('click', async (e) => {
       const target = e.target;
       if (!(target instanceof HTMLButtonElement)) return;
-      sendMessage(target.textContent || 'Merhaba');
+      await sendMessage(target.textContent || 'Merhaba');
     });
+
+    uploadBtn.addEventListener('click', () => fileInput.click());
+    uploadBtn2.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => onFilesPicked(Array.from(e.target.files || [])));
   </script>
 </body>
 </html>
