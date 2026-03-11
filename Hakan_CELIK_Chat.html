@@ -5,134 +5,412 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hakan ÇELİK - Yapay Zeka Sohbet</title>
   <style>
-    :root { color-scheme: dark; }
+    :root {
+      color-scheme: dark;
+      --bg: #070b18;
+      --panel: rgba(17, 24, 39, 0.82);
+      --panel-soft: rgba(30, 41, 59, 0.78);
+      --border: rgba(148, 163, 184, 0.25);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #22d3ee;
+      --accent-2: #a78bfa;
+      --user: linear-gradient(135deg, #22d3ee, #38bdf8);
+      --bot: rgba(15, 23, 42, 0.85);
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .app {
-      width: min(900px, 95vw);
-      height: min(700px, 95vh);
-      background: #111827;
-      border: 1px solid #334155;
-      border-radius: 12px;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: var(--text);
       display: grid;
-      grid-template-rows: auto 1fr auto;
+      place-items: center;
+      background:
+        radial-gradient(circle at 15% 20%, #1d4ed8 0%, transparent 35%),
+        radial-gradient(circle at 80% 0%, #7c3aed 0%, transparent 40%),
+        var(--bg);
+      padding: 20px;
+    }
+
+    .app {
+      width: min(960px, 100%);
+      height: min(760px, calc(100vh - 40px));
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      box-shadow: 0 24px 80px rgba(2, 6, 23, 0.55);
+      backdrop-filter: blur(10px);
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
       overflow: hidden;
     }
+
     header {
-      padding: 14px 18px;
-      border-bottom: 1px solid #334155;
-      font-weight: bold;
-      font-size: 1.1rem;
-      background: #1e293b;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(90deg, rgba(34, 211, 238, 0.12), rgba(167, 139, 250, 0.12));
     }
+
+    .title {
+      font-size: 1.12rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 2px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 12px #4ade80;
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel-soft);
+    }
+
+    .chip {
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: rgba(30, 41, 59, 0.8);
+      color: #cbd5e1;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .chip:hover {
+      border-color: rgba(34, 211, 238, 0.8);
+      transform: translateY(-1px);
+      color: #e2e8f0;
+    }
+
     #chat {
-      padding: 16px;
+      padding: 18px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
-    .msg {
-      max-width: 75%;
-      padding: 10px 12px;
-      border-radius: 12px;
-      line-height: 1.45;
-      white-space: pre-wrap;
+
+    .row {
+      display: flex;
+      gap: 9px;
+      align-items: flex-end;
+      max-width: 88%;
     }
-    .user {
+
+    .row.user-row {
       margin-left: auto;
-      background: #0ea5e9;
-      color: #082f49;
+      flex-direction: row-reverse;
     }
-    .bot {
-      margin-right: auto;
-      background: #1f2937;
-      border: 1px solid #334155;
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: rgba(2, 6, 23, 0.7);
+      color: #bfdbfe;
+      flex-shrink: 0;
     }
+
+    .user-row .avatar { color: #083344; background: rgba(34, 211, 238, 0.7); }
+
+    .msg {
+      padding: 11px 13px;
+      border-radius: 14px;
+      white-space: pre-wrap;
+      line-height: 1.45;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 24px rgba(2, 6, 23, 0.3);
+    }
+
+    .bot { background: var(--bot); }
+    .user { background: var(--user); color: #062135; border: none; font-weight: 600; }
+
+    .typing {
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-style: italic;
+      margin-left: 40px;
+      display: none;
+    }
+
     form {
-      border-top: 1px solid #334155;
+      border-top: 1px solid var(--border);
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 10px;
-      padding: 12px;
-      background: #1e293b;
+      padding: 14px;
+      background: var(--panel-soft);
     }
+
     input {
+      width: 100%;
       font-size: 1rem;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #475569;
-      background: #0f172a;
-      color: #e2e8f0;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.88);
+      color: var(--text);
+      outline: none;
     }
+
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.16); }
+
     button {
       border: none;
-      border-radius: 8px;
-      padding: 10px 14px;
-      background: #22c55e;
-      color: #052e16;
-      font-weight: bold;
+      border-radius: 10px;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #03142e;
+      font-weight: 700;
       cursor: pointer;
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      padding: 0 15px 14px;
+    }
+
+    @media (max-width: 600px) {
+      .row { max-width: 100%; }
+      .app { height: calc(100vh - 20px); }
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <header>Hakan ÇELİK - Yapay Zeka Sohbet</header>
+    <header>
+      <div>
+        <div class="title">Hakan ÇELİK - Yapay Zeka Sohbet</div>
+        <div class="subtitle">Gelişmiş yerel anlama motoru • Türkçe optimize</div>
+      </div>
+      <div class="status-dot" title="Çevrimiçi"></div>
+    </header>
+
+    <div class="quick-actions" id="quickActions">
+      <button type="button" class="chip">Benim adım Ahmet</button>
+      <button type="button" class="chip">Saat kaç?</button>
+      <button type="button" class="chip">Bugün ne yapabilirim?</button>
+      <button type="button" class="chip">2+5*3 hesapla</button>
+      <button type="button" class="chip">Bana motivasyon ver</button>
+    </div>
+
     <div id="chat"></div>
+    <div class="typing" id="typing">Hakan ÇELİK düşünüyor...</div>
+
     <form id="chatForm">
       <input id="prompt" type="text" placeholder="Mesajınızı yazın..." autocomplete="off" required />
       <button type="submit">Gönder</button>
     </form>
+    <div class="hint">İpucu: Adınızı tanıyabilir, basit matematik yapabilir ve önceki mesajlardan bağlam tutabilir.</div>
   </div>
 
   <script>
     const chat = document.getElementById('chat');
     const form = document.getElementById('chatForm');
     const promptInput = document.getElementById('prompt');
+    const typing = document.getElementById('typing');
+    const quickActions = document.getElementById('quickActions');
 
-    const rules = [
-      { keys: ['merhaba', 'selam'], reply: 'Merhaba! Ben Hakan ÇELİK sohbet asistanıyım. Size nasıl yardımcı olabilirim?' },
-      { keys: ['nasılsın'], reply: 'Teşekkür ederim, gayet iyiyim. Siz nasılsınız?' },
-      { keys: ['adın ne', 'ismin ne'], reply: 'Benim adım Hakan ÇELİK için hazırlanmış yerel yapay zeka sohbet botu.' },
-      { keys: ['yardım', 'neler yapabilirsin'], reply: 'Sorularınızı yanıtlayabilir, fikir üretebilir ve genel sohbet edebilirim.' },
-      { keys: ['teşekkür'], reply: 'Rica ederim! Yardımcı olabildiysem ne mutlu bana.' },
-      { keys: ['görüşürüz', 'hoşça kal'], reply: 'Görüşmek üzere! İstediğiniz zaman tekrar yazabilirsiniz.' }
-    ];
+    const memory = {
+      userName: null,
+      lastTopic: null,
+      lastQuestion: null
+    };
+
+    const knowledge = {
+      javascript: 'JavaScript, web uygulamalarının etkileşimli davranışlarını yöneten bir programlama dilidir.',
+      python: 'Python, okunabilirliği yüksek ve yapay zeka dahil birçok alanda kullanılan güçlü bir dildir.',
+      yapayzeka: 'Yapay zeka, verilerden öğrenip karar verme veya tahmin üretme yeteneği olan sistemleri ifade eder.',
+      turkiye: 'Türkiye; Avrupa ve Asya arasında köprü konumunda, zengin kültürel mirasa sahip bir ülkedir.'
+    };
+
+    const answerPools = {
+      motivation: [
+        'Küçük bir adım bile ilerlemedir. Bugün sadece başlayın, gerisi gelir.',
+        'Mükemmel olmak zorunda değilsiniz; tutarlı olmak yeterli.',
+        'Disiplin, motivasyonun gelmediği günlerde bile sizi hedefe taşır.'
+      ],
+      fallback: [
+        'Güzel bir konu açtınız. Bunu biraz daha detaylandırır mısınız?',
+        'Bu konuda yardımcı olabilirim. Neyi özellikle öğrenmek istiyorsunuz?',
+        'Anladım. İsterseniz bunu adım adım birlikte netleştirelim.'
+      ]
+    };
+
+    function normalizeText(text) {
+      return text
+        .toLocaleLowerCase('tr-TR')
+        .replace(/[çğıöşü]/g, (ch) => ({ 'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u' }[ch]))
+        .replace(/[^a-z0-9+\-*/().\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function randomFrom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
 
     function addMessage(text, role) {
-      const div = document.createElement('div');
-      div.className = `msg ${role}`;
-      div.textContent = text;
-      chat.appendChild(div);
+      const row = document.createElement('div');
+      row.className = `row ${role === 'user' ? 'user-row' : 'bot-row'}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.textContent = role === 'user' ? 'Siz' : 'HC';
+
+      const bubble = document.createElement('div');
+      bubble.className = `msg ${role}`;
+      bubble.textContent = text;
+
+      row.appendChild(avatar);
+      row.appendChild(bubble);
+      chat.appendChild(row);
       chat.scrollTop = chat.scrollHeight;
     }
 
-    function aiReply(text) {
-      const normalized = text.toLocaleLowerCase('tr-TR');
-      for (const rule of rules) {
-        if (rule.keys.some(k => normalized.includes(k))) return rule.reply;
-      }
-      return 'Bunu anladım: "' + text + '"\nDaha detay verirseniz daha iyi yardımcı olabilirim.';
+    function parseUserName(rawText) {
+      const match = rawText.match(/(?:benim adim|adim|ismim|ben)\s+([A-Za-zÇĞİÖŞÜçğıöşü]{2,})/i);
+      if (!match) return null;
+      const name = match[1].trim();
+      return name.charAt(0).toLocaleUpperCase('tr-TR') + name.slice(1).toLocaleLowerCase('tr-TR');
     }
 
-    addMessage('Merhaba! Ben Hakan ÇELİK sohbet botuyum. Sohbete başlayabilirsiniz.', 'bot');
+    function calculateExpression(raw) {
+      const expr = raw.replace(',', '.').match(/[0-9+\-*/().\s]+/g)?.join('').trim();
+      if (!expr || !/\d/.test(expr)) return null;
+      if (!/^[0-9+\-*/().\s]+$/.test(expr)) return null;
+      try {
+        const result = Function(`"use strict"; return (${expr});`)();
+        if (!Number.isFinite(result)) return 'Bu işlemde geçerli bir sonuç çıkmadı.';
+        return `Sonuç: ${result}`;
+      } catch {
+        return 'İşlemi çözerken bir hata oldu. Örneğin: 12/(3+1) şeklinde yazabilirsiniz.';
+      }
+    }
+
+    function getIntent(normalized, rawText) {
+      if (/^(selam|merhaba|hey|iyi gunler)/.test(normalized)) return 'greet';
+      if (/(nasilsin|naber|iyi misin)/.test(normalized)) return 'mood';
+      if (/(saat kac|suan saat|kacta)/.test(normalized)) return 'time';
+      if (/(bugun tarih|tarih ne|hangi gun)/.test(normalized)) return 'date';
+      if (/(yardim|neler yapabilirsin|ne yapabilirsin)/.test(normalized)) return 'help';
+      if (/(motivasyon|motive et)/.test(normalized)) return 'motivation';
+      if (/(f[ıi]kra|saka)/.test(normalized)) return 'joke';
+      if (/(adim ne|benim adim ne|isimim ne|adimi hatirliyor musun)/.test(normalized)) return 'recall_name';
+      if (parseUserName(rawText)) return 'set_name';
+      if (/(hesapla|kac eder|\d+\s*[+\-*/])/.test(normalized)) return 'calculate';
+      if (/(javascript|python|yapay zeka|turkiye)/.test(normalized)) return 'knowledge';
+      return 'fallback';
+    }
+
+    function replyTo(rawText) {
+      const normalized = normalizeText(rawText);
+      const intent = getIntent(normalized, rawText);
+      memory.lastQuestion = rawText;
+
+      if (intent === 'set_name') {
+        const found = parseUserName(rawText);
+        memory.userName = found;
+        return `Memnun oldum ${found}! İsminizi hatırlayacağım.`;
+      }
+
+      if (intent === 'recall_name') {
+        return memory.userName
+          ? `Evet, adınızı hatırlıyorum: ${memory.userName}.`
+          : 'Henüz adınızı söylemediniz. "Benim adım ..." diye yazabilirsiniz.';
+      }
+
+      if (intent === 'greet') return `Merhaba${memory.userName ? ' ' + memory.userName : ''}! Ben Hakan ÇELİK. Sohbet etmeye hazırım.`;
+      if (intent === 'mood') return 'Harikayım, teşekkür ederim! İsterseniz bugün bir konu seçip birlikte ilerleyelim.';
+
+      if (intent === 'time') {
+        const now = new Date();
+        return `Şu an saat ${now.toLocaleTimeString('tr-TR')}.`;
+      }
+
+      if (intent === 'date') {
+        const now = new Date();
+        return `Bugünün tarihi: ${now.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}.`;
+      }
+
+      if (intent === 'help') {
+        return 'Yapabildiklerim:\n• Genel sohbet\n• Adınızı hatırlama\n• Saat/tarih söyleme\n• Basit matematik işlemleri\n• Kısa bilgi kartları (Python, JavaScript, yapay zeka vb.)\n• Motivasyon ve küçük espriler';
+      }
+
+      if (intent === 'motivation') return randomFrom(answerPools.motivation);
+      if (intent === 'joke') return 'Yapay zekaya "neden geç kaldın" demişler; "cache temizliyordum" demiş. 😄';
+
+      if (intent === 'calculate') {
+        const calc = calculateExpression(normalized);
+        return calc ?? 'İşlem göremedim. Örnek: "(12+8)/2 kaç eder" yazabilirsiniz.';
+      }
+
+      if (intent === 'knowledge') {
+        for (const key of Object.keys(knowledge)) {
+          if (normalized.includes(key)) {
+            memory.lastTopic = key;
+            return knowledge[key];
+          }
+        }
+      }
+
+      if ((/daha fazla|detay|ac/.test(normalized)) && memory.lastTopic && knowledge[memory.lastTopic]) {
+        return `${knowledge[memory.lastTopic]}\nDetay isterseniz örneklerle de anlatabilirim.`;
+      }
+
+      return randomFrom(answerPools.fallback);
+    }
+
+    function sendMessage(text) {
+      addMessage(text, 'user');
+      typing.style.display = 'block';
+      setTimeout(() => {
+        typing.style.display = 'none';
+        addMessage(replyTo(text), 'bot');
+      }, 300 + Math.floor(Math.random() * 300));
+    }
+
+    addMessage('Merhaba! Ben Hakan ÇELİK. Daha iyi anlama ve konuşma yeteneğiyle size yardımcı olmak için buradayım.', 'bot');
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const text = promptInput.value.trim();
       if (!text) return;
-      addMessage(text, 'user');
       promptInput.value = '';
-      setTimeout(() => addMessage(aiReply(text), 'bot'), 250);
+      sendMessage(text);
+    });
+
+    quickActions.addEventListener('click', (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLButtonElement)) return;
+      sendMessage(target.textContent || 'Merhaba');
     });
   </script>
 </body>
