@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basit Flipy Bird</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(#b4e4ff, #eaf8ff);
+    }
+
+    .game-wrapper {
+      text-align: center;
+    }
+
+    canvas {
+      border: 3px solid #1f2937;
+      border-radius: 8px;
+      background: #87ceeb;
+      display: block;
+      margin-inline: auto;
+    }
+
+    p {
+      margin-top: 12px;
+      color: #0f172a;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <main class="game-wrapper">
+    <canvas id="game" width="400" height="600" aria-label="Flipy Bird oyunu"></canvas>
+    <p>Boşluk (Space) veya tıkla: zıpla • Yeniden başlat: R</p>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+
+    const gravity = 0.4;
+    const jumpPower = -7.5;
+    const pipeWidth = 60;
+    const pipeGap = 150;
+    const pipeSpeed = 2.2;
+
+    let bird;
+    let pipes;
+    let score;
+    let best;
+    let frame;
+    let gameOver;
+
+    function resetGame() {
+      bird = {
+        x: 100,
+        y: canvas.height / 2,
+        size: 16,
+        velocity: 0
+      };
+
+      pipes = [];
+      score = 0;
+      frame = 0;
+      gameOver = false;
+    }
+
+    function spawnPipe() {
+      const minTop = 60;
+      const maxTop = canvas.height - pipeGap - 120;
+      const topHeight = Math.floor(Math.random() * (maxTop - minTop + 1) + minTop);
+
+      pipes.push({
+        x: canvas.width,
+        topHeight,
+        passed: false
+      });
+    }
+
+    function jump() {
+      if (gameOver) return;
+      bird.velocity = jumpPower;
+    }
+
+    function intersectsPipe(pipe) {
+      const birdLeft = bird.x - bird.size;
+      const birdRight = bird.x + bird.size;
+      const birdTop = bird.y - bird.size;
+      const birdBottom = bird.y + bird.size;
+
+      const pipeLeft = pipe.x;
+      const pipeRight = pipe.x + pipeWidth;
+      const topPipeBottom = pipe.topHeight;
+      const bottomPipeTop = pipe.topHeight + pipeGap;
+
+      const hitsHorizontally = birdRight > pipeLeft && birdLeft < pipeRight;
+      const hitsTopPipe = birdTop < topPipeBottom;
+      const hitsBottomPipe = birdBottom > bottomPipeTop;
+
+      return hitsHorizontally && (hitsTopPipe || hitsBottomPipe);
+    }
+
+    function update() {
+      if (gameOver) return;
+
+      frame += 1;
+      bird.velocity += gravity;
+      bird.y += bird.velocity;
+
+      if (frame % 95 === 0) {
+        spawnPipe();
+      }
+
+      pipes.forEach(pipe => {
+        pipe.x -= pipeSpeed;
+
+        if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
+          pipe.passed = true;
+          score += 1;
+          best = Math.max(best, score);
+        }
+      });
+
+      pipes = pipes.filter(pipe => pipe.x + pipeWidth > -10);
+
+      const hitGroundOrCeiling = bird.y + bird.size > canvas.height || bird.y - bird.size < 0;
+      const hitPipe = pipes.some(intersectsPipe);
+
+      if (hitGroundOrCeiling || hitPipe) {
+        gameOver = true;
+      }
+    }
+
+    function drawBird() {
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(bird.x, bird.y, bird.size, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#111827';
+      ctx.beginPath();
+      ctx.arc(bird.x + 5, bird.y - 4, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawPipes() {
+      ctx.fillStyle = '#16a34a';
+      pipes.forEach(pipe => {
+        ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
+        ctx.fillRect(pipe.x, pipe.topHeight + pipeGap, pipeWidth, canvas.height);
+      });
+    }
+
+    function drawText() {
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 24px Arial';
+      ctx.fillText(`Skor: ${score}`, 16, 36);
+
+      ctx.font = '16px Arial';
+      ctx.fillText(`En iyi: ${best}`, 16, 60);
+
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+        ctx.fillRect(50, 240, 300, 130);
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 26px Arial';
+        ctx.fillText('Oyun Bitti', 125, 285);
+        ctx.font = '16px Arial';
+        ctx.fillText('Yeniden başlatmak için R', 108, 320);
+      }
+    }
+
+    function drawBackground() {
+      ctx.fillStyle = '#87ceeb';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#93c5fd';
+      ctx.fillRect(0, canvas.height - 70, canvas.width, 70);
+    }
+
+    function loop() {
+      update();
+      drawBackground();
+      drawPipes();
+      drawBird();
+      drawText();
+      requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('keydown', event => {
+      if (event.code === 'Space') {
+        event.preventDefault();
+        jump();
+      }
+
+      if (event.key.toLowerCase() === 'r' && gameOver) {
+        resetGame();
+      }
+    });
+
+    canvas.addEventListener('pointerdown', jump);
+
+    best = 0;
+    resetGame();
+    loop();
+  </script>
+</body>
+</html>
