@@ -1,0 +1,4 @@
+Python, hızlı prototipleme ve API geliştirme için yaygın kullanılan bir dildir.
+FastAPI, tip ipuçlarıyla çalışan yüksek performanslı modern bir Python web framework'üdür.
+RAG (Retrieval-Augmented Generation), model yanıtlarını dış bilgi kaynaklarından alınan içerikle güçlendirir.
+Basit bir RAG sisteminde önce ilgili metin parçaları aranır, sonra bu parçalar yanıt üretiminde bağlam olarak kullanılır.

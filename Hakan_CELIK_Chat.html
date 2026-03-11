@@ -5,586 +5,171 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hakan ÇELİK - Yapay Zeka Sohbet</title>
   <style>
-    :root {
-      color-scheme: dark;
-      --bg: #070b18;
-      --panel: rgba(17, 24, 39, 0.84);
-      --panel-soft: rgba(30, 41, 59, 0.8);
-      --border: rgba(148, 163, 184, 0.25);
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --accent: #22d3ee;
-      --accent-2: #a78bfa;
-      --user: linear-gradient(135deg, #22d3ee, #38bdf8);
-      --bot: rgba(15, 23, 42, 0.88);
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      color: var(--text);
-      display: grid;
-      place-items: center;
-      background:
-        radial-gradient(circle at 15% 20%, #1d4ed8 0%, transparent 35%),
-        radial-gradient(circle at 85% 0%, #7c3aed 0%, transparent 40%),
-        var(--bg);
-      padding: 20px;
-    }
-
-    .app {
-      width: min(1000px, 100%);
-      height: min(800px, calc(100vh - 40px));
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: var(--panel);
-      box-shadow: 0 24px 80px rgba(2, 6, 23, 0.55);
-      backdrop-filter: blur(10px);
-      display: grid;
-      grid-template-rows: auto auto auto 1fr auto auto;
-      overflow: hidden;
-    }
-
-    header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: linear-gradient(90deg, rgba(34, 211, 238, 0.12), rgba(167, 139, 250, 0.12));
-    }
-
-    .title { font-size: 1.1rem; font-weight: 700; }
-    .subtitle { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
-    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 12px #4ade80; }
-
-    .toolbar, .memory-bar, .quick-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border);
-      background: var(--panel-soft);
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .toolbar-left, .memory-left { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-
-    .chip, .tool-btn {
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      background: rgba(30, 41, 59, 0.8);
-      color: #cbd5e1;
-      padding: 7px 10px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      cursor: pointer;
-    }
-
-    .tool-btn { border-radius: 10px; }
-    .chip:hover, .tool-btn:hover { border-color: rgba(34, 211, 238, 0.9); color: #fff; }
-
-    .memory-pill {
-      font-size: 0.77rem;
-      color: #bae6fd;
-      background: rgba(14, 116, 144, 0.2);
-      border: 1px solid rgba(34, 211, 238, 0.4);
-      border-radius: 999px;
-      padding: 6px 10px;
-    }
-
-    #chat {
-      padding: 18px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .row { display: flex; gap: 9px; align-items: flex-end; max-width: 92%; }
-    .row.user-row { margin-left: auto; flex-direction: row-reverse; }
-
-    .avatar {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: 0.75rem;
-      font-weight: 700;
-      border: 1px solid var(--border);
-      background: rgba(2, 6, 23, 0.7);
-      color: #bfdbfe;
-      flex-shrink: 0;
-    }
-
-    .msg {
-      padding: 11px 13px;
-      border-radius: 14px;
-      white-space: pre-wrap;
-      line-height: 1.42;
-      border: 1px solid var(--border);
-      box-shadow: 0 8px 24px rgba(2, 6, 23, 0.3);
-    }
-
-    .bot { background: var(--bot); }
-    .user { background: var(--user); color: #062135; border: none; font-weight: 600; }
-    .typing { color: var(--muted); font-size: 0.85rem; font-style: italic; margin-left: 40px; display: none; }
-
-    .attachment-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-
-    .attachment-item {
-      border: 1px solid rgba(148, 163, 184, 0.45);
-      background: rgba(2, 6, 23, 0.35);
-      border-radius: 10px;
-      padding: 8px;
-      font-size: 0.78rem;
-      max-width: 220px;
-      overflow-wrap: anywhere;
-    }
-
-    .attachment-item img {
-      width: 100%;
-      max-height: 120px;
-      object-fit: cover;
-      border-radius: 6px;
-      margin-bottom: 6px;
-    }
-
-    form {
-      border-top: 1px solid var(--border);
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 10px;
-      padding: 14px;
-      background: var(--panel-soft);
-      align-items: center;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      font-size: 1rem;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      background: rgba(15, 23, 42, 0.88);
-      color: var(--text);
-      outline: none;
-    }
-
-    input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.16); }
-
-    .send-btn {
-      border: none;
-      border-radius: 10px;
-      padding: 12px 16px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #03142e;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .hint { font-size: 0.78rem; color: var(--muted); padding: 0 15px 14px; }
-
-    @media (max-width: 700px) {
-      .app { height: calc(100vh - 20px); }
-      .row { max-width: 100%; }
-      form { grid-template-columns: 1fr auto; }
-      #uploadBtn { grid-column: 1 / -1; }
-    }
+    :root{color-scheme:dark;--bg:#070b18;--panel:rgba(17,24,39,.84);--panel-soft:rgba(30,41,59,.8);--border:rgba(148,163,184,.25);--text:#e2e8f0;--muted:#94a3b8;--a:#22d3ee;--a2:#a78bfa;--user:linear-gradient(135deg,#22d3ee,#38bdf8);--bot:rgba(15,23,42,.88)}
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;font-family:Segoe UI,Arial,sans-serif;color:var(--text);display:grid;place-items:center;background:radial-gradient(circle at 15% 20%,#1d4ed8 0%,transparent 35%),radial-gradient(circle at 85% 0%,#7c3aed 0%,transparent 40%),var(--bg);padding:20px}
+    .app{width:min(1000px,100%);height:min(800px,calc(100vh - 40px));border-radius:20px;border:1px solid var(--border);background:var(--panel);box-shadow:0 24px 80px rgba(2,6,23,.55);backdrop-filter:blur(10px);display:grid;grid-template-rows:auto auto auto 1fr auto auto;overflow:hidden}
+    header,.toolbar,.quick{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--panel-soft);display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+    header{padding:16px 20px;background:linear-gradient(90deg,rgba(34,211,238,.12),rgba(167,139,250,.12))}
+    .title{font-size:1.1rem;font-weight:700}.sub{color:var(--muted);font-size:.82rem}.dot{width:10px;height:10px;border-radius:50%;background:#4ade80;box-shadow:0 0 12px #4ade80}
+    .pill,.btn{border:1px solid rgba(56,189,248,.35);background:rgba(30,41,59,.8);color:#cbd5e1;padding:7px 10px;border-radius:999px;font-size:.82rem;cursor:pointer}
+    .btn{border-radius:10px}
+    #chat{padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+    .row{display:flex;gap:9px;align-items:flex-end;max-width:92%}.row.user{margin-left:auto;flex-direction:row-reverse}
+    .av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:.74rem;font-weight:700;border:1px solid var(--border);background:rgba(2,6,23,.7);color:#bfdbfe;flex-shrink:0}
+    .bubble{padding:11px 13px;border-radius:14px;white-space:pre-wrap;line-height:1.4;border:1px solid var(--border);box-shadow:0 8px 24px rgba(2,6,23,.3);background:var(--bot)}
+    .row.user .bubble{background:var(--user);color:#062135;border:none;font-weight:600}
+    form{border-top:1px solid var(--border);display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:14px;background:var(--panel-soft);align-items:center}
+    input[type=text]{width:100%;font-size:1rem;padding:12px;border-radius:10px;border:1px solid rgba(148,163,184,.4);background:rgba(15,23,42,.88);color:var(--text);outline:none}
+    .send{border:none;border-radius:10px;padding:12px 16px;background:linear-gradient(135deg,var(--a),var(--a2));color:#03142e;font-weight:700;cursor:pointer}
+    .typing{color:var(--muted);font-size:.85rem;font-style:italic;margin-left:40px;display:none}
+    .hint{font-size:.78rem;color:var(--muted);padding:0 15px 14px}
   </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div>
-        <div class="title">Hakan ÇELİK - Yapay Zeka Sohbet</div>
-        <div class="subtitle">Yerel LLM tarzı beyin + kalıcı hafıza (offline)</div>
-      </div>
-      <div class="status-dot" title="Çevrimiçi"></div>
-    </header>
-
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <button type="button" class="tool-btn" id="uploadBtn">📎 Dosya / Fotoğraf Ekle</button>
-      </div>
-      <small style="color:var(--muted)">Model benzeri: niyet analizi, bağlam takibi, hafıza.</small>
+<div class="app">
+  <header>
+    <div><div class="title">Hakan ÇELİK - Yapay Zeka Sohbet</div><div class="sub">Dinamik beyin + CoT tarzı iç akıl yürütme + kısa süreli bağlam</div></div>
+    <div class="dot"></div>
+  </header>
+  <div class="toolbar">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn" id="clearMemoryBtn" type="button">🧠 Hafızayı Sıfırla</button>
+      <button class="btn" id="uploadBtn" type="button">📎 Dosya / Fotoğraf Ekle</button>
+      <span class="pill" id="memoryInfo">Hafıza: yükleniyor...</span>
     </div>
-
-    <div class="memory-bar">
-      <div class="memory-left">
-        <span class="memory-pill" id="memoryInfo">Hafıza: yükleniyor...</span>
-      </div>
-      <button type="button" class="tool-btn" id="clearMemoryBtn">🧠 Hafızayı Sıfırla</button>
-    </div>
-
-    <div class="quick-actions" id="quickActions">
-      <button type="button" class="chip">Benim adım Ahmet</button>
-      <button type="button" class="chip">Beni hatırlıyor musun?</button>
-      <button type="button" class="chip">Bugün nasıl plan yapayım?</button>
-      <button type="button" class="chip">Kafam çok karışık</button>
-      <button type="button" class="chip">Kısa bir motivasyon ver</button>
-    </div>
-
-    <div id="chat"></div>
-    <div class="typing" id="typing">Hakan ÇELİK düşünüyor...</div>
-
-    <form id="chatForm">
-      <button type="button" id="uploadBtn2" class="tool-btn">📁 Ekle</button>
-      <input id="prompt" type="text" placeholder="Mesajınızı yazın..." autocomplete="off" required />
-      <button class="send-btn" type="submit">Gönder</button>
-      <input id="fileInput" type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xlsx" hidden />
-    </form>
-    <div class="hint">Bu sürüm internet kullanmaz; tüm konuşma ve hatırlama tarayıcı belleğinde yerel yapılır.</div>
+    <small style="color:var(--muted)">Backend: Python FastAPI + RAG-lite</small>
   </div>
+  <div class="quick" id="quickActions">
+    <button class="pill" type="button">Benim adım Ahmet</button>
+    <button class="pill" type="button">Beni hatırlıyor musun?</button>
+    <button class="pill" type="button">Bugün nasıl plan yapayım?</button>
+    <button class="pill" type="button">Kafam çok karışık</button>
+  </div>
+  <div id="chat"></div>
+  <div class="typing" id="typing">Hakan ÇELİK düşünüyor...</div>
+  <form id="chatForm">
+    <button class="btn" type="button" id="uploadBtn2">📁 Ekle</button>
+    <input id="prompt" type="text" placeholder="Mesajınızı yazın..." required />
+    <button class="send" type="submit">Gönder</button>
+    <input id="fileInput" type="file" multiple hidden />
+  </form>
+  <div class="hint">Sunucu modeli son 10 mesaj bağlamını kullanır; yanıtlar sabit kalıp yerine niyet + bilgiye göre üretilir.</div>
+</div>
 
-  <script>
-    const STORAGE_KEY = 'hakan_celik_brain_v2';
-    const CHAT_LOG_KEY = 'hakan_celik_chat_v2';
+<script>
+  const chat = document.getElementById('chat');
+  const form = document.getElementById('chatForm');
+  const promptInput = document.getElementById('prompt');
+  const typing = document.getElementById('typing');
+  const quickActions = document.getElementById('quickActions');
+  const memoryInfo = document.getElementById('memoryInfo');
+  const clearMemoryBtn = document.getElementById('clearMemoryBtn');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const uploadBtn2 = document.getElementById('uploadBtn2');
+  const fileInput = document.getElementById('fileInput');
 
-    const chat = document.getElementById('chat');
-    const form = document.getElementById('chatForm');
-    const promptInput = document.getElementById('prompt');
-    const typing = document.getElementById('typing');
-    const quickActions = document.getElementById('quickActions');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const uploadBtn2 = document.getElementById('uploadBtn2');
-    const fileInput = document.getElementById('fileInput');
-    const clearMemoryBtn = document.getElementById('clearMemoryBtn');
-    const memoryInfo = document.getElementById('memoryInfo');
+  const SESSION_KEY = 'hakan_session_id';
+  const CHAT_KEY = 'hakan_front_chat_v3';
+  let pendingFiles = [];
 
-    let pendingFiles = [];
-
-    const defaultBrain = {
-      memory: {
-        userName: null,
-        mood: null,
-        goal: null,
-        preferences: [],
-        lastTopic: null,
-        lastQuestion: null,
-        sessionCount: 1,
-        lastSeenAt: new Date().toISOString()
-      },
-      knowledge: {
-        javascript: 'JavaScript, web uygulamalarının etkileşimli davranışlarını yöneten programlama dilidir.',
-        python: 'Python, okunabilirliği güçlü olan ve veri bilimi/yapay zeka dahil birçok alanda kullanılan dildir.',
-        yapayzeka: 'Yapay zeka, veriden öğrenen ve karar verme süreçlerini otomatikleştiren sistemler bütünüdür.',
-        turkiye: 'Türkiye; Avrupa ve Asya arasında köprü konumunda, genç nüfusu ve güçlü kültürel birikimi olan bir ülkedir.'
-      },
-      templates: {
-        empathy: [
-          'Sizi anlıyorum, bu durum gerçekten yorucu olabilir.',
-          'Bu his çok normal, yalnız değilsiniz.',
-          'Bunu paylaşmanız çok iyi olmuş, birlikte netleştirebiliriz.'
-        ],
-        fallback: [
-          'Bunu daha iyi anlamam için hedefinizi bir cümleyle yazar mısınız?',
-          'İsterseniz bu konuyu adım adım çözelim: önce sorun, sonra seçenekler, sonra karar.',
-          'Güzel bir konu açtınız. Sizin için kısa cevap mı detaylı plan mı hazırlayayım?'
-        ],
-        motivation: [
-          'Küçük ama net bir adım seçin; büyük ilerleme böyle başlar.',
-          'Mükemmel olmaya değil, devam etmeye odaklanın.',
-          'Bugün sadece %1 daha iyi olmanız yeterli.'
-        ]
-      }
-    };
-
-    function loadBrain() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return structuredClone(defaultBrain);
-        const parsed = JSON.parse(raw);
-        return {
-          ...structuredClone(defaultBrain),
-          ...parsed,
-          memory: { ...structuredClone(defaultBrain).memory, ...(parsed.memory || {}) }
-        };
-      } catch {
-        return structuredClone(defaultBrain);
-      }
+  const sessionId = (() => {
+    let id = localStorage.getItem(SESSION_KEY);
+    if (!id) {
+      id = `sess_${Date.now()}_${Math.random().toString(16).slice(2, 10)}`;
+      localStorage.setItem(SESSION_KEY, id);
     }
+    return id;
+  })();
 
-    const Brain = loadBrain();
-    Brain.memory.sessionCount = (Brain.memory.sessionCount || 0) + 1;
-    Brain.memory.lastSeenAt = new Date().toISOString();
-
-    function saveBrain() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(Brain));
+  function addMessage(text, role, persist = true) {
+    const row = document.createElement('div');
+    row.className = `row ${role === 'user' ? 'user' : ''}`;
+    const av = document.createElement('div');
+    av.className = 'av'; av.textContent = role === 'user' ? 'Siz' : 'HC';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble'; bubble.textContent = text;
+    row.append(av, bubble);
+    chat.appendChild(row);
+    chat.scrollTop = chat.scrollHeight;
+    if (persist) {
+      const logs = JSON.parse(localStorage.getItem(CHAT_KEY) || '[]');
+      logs.push({ role, text });
+      localStorage.setItem(CHAT_KEY, JSON.stringify(logs.slice(-80)));
     }
+  }
 
-    function updateMemoryInfo() {
-      const name = Brain.memory.userName || 'Bilinmiyor';
-      const pref = Brain.memory.preferences.length ? Brain.memory.preferences.slice(-2).join(', ') : 'Yok';
-      memoryInfo.textContent = `Hafıza | İsim: ${name} | Tercih: ${pref} | Oturum: ${Brain.memory.sessionCount}`;
+  function restoreChat() {
+    const logs = JSON.parse(localStorage.getItem(CHAT_KEY) || '[]');
+    logs.forEach((m) => addMessage(m.text, m.role, false));
+    if (!logs.length) addMessage('Merhaba! Ben Hakan ÇELİK. Seni hatırlayan ve bağlamı koruyan yerel bir AI asistanıyım.');
+  }
+
+  async function refreshMemory() {
+    try {
+      const res = await fetch(`/api/memory/${sessionId}`);
+      if (!res.ok) throw new Error('memory');
+      const m = await res.json();
+      memoryInfo.textContent = `Hafıza | İsim: ${m.name || 'yok'} | Niyet: ${m.last_intent || 'yok'} | Mesaj: ${m.history_items}`;
+    } catch {
+      memoryInfo.textContent = 'Hafıza: sunucuya bağlanamadı';
     }
+  }
 
-    function normalizeText(text) {
-      return text
-        .toLocaleLowerCase('tr-TR')
-        .replace(/[çğıöşü]/g, (ch) => ({ 'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u' }[ch]))
-        .replace(/[^a-z0-9+\-*/().\s]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-
-    function randomFrom(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function addMessage(text, role, attachments = null, persist = true) {
-      const row = document.createElement('div');
-      row.className = `row ${role === 'user' ? 'user-row' : 'bot-row'}`;
-
-      const avatar = document.createElement('div');
-      avatar.className = 'avatar';
-      avatar.textContent = role === 'user' ? 'Siz' : 'HC';
-
-      const bubble = document.createElement('div');
-      bubble.className = `msg ${role}`;
-      bubble.textContent = text;
-      row.appendChild(avatar);
-      row.appendChild(bubble);
-
-      if (attachments?.length) {
-        const list = document.createElement('div');
-        list.className = 'attachment-list';
-        attachments.forEach((file) => {
-          const item = document.createElement('div');
-          item.className = 'attachment-item';
-          if (file.type && file.type.startsWith('image/') && file.previewUrl) {
-            const img = document.createElement('img');
-            img.src = file.previewUrl;
-            img.alt = file.name;
-            item.appendChild(img);
-          }
-          const info = document.createElement('div');
-          info.textContent = `${file.name} (${Math.max(1, Math.round(file.size / 1024))} KB)`;
-          item.appendChild(info);
-          list.appendChild(item);
-        });
-        bubble.appendChild(list);
-      }
-
-      chat.appendChild(row);
-      chat.scrollTop = chat.scrollHeight;
-
-      if (persist) persistChatMessage({ role, text });
-    }
-
-    function persistChatMessage(message) {
-      const existing = JSON.parse(localStorage.getItem(CHAT_LOG_KEY) || '[]');
-      existing.push(message);
-      localStorage.setItem(CHAT_LOG_KEY, JSON.stringify(existing.slice(-80)));
-    }
-
-    function restoreChatLog() {
-      const messages = JSON.parse(localStorage.getItem(CHAT_LOG_KEY) || '[]');
-      messages.forEach((m) => addMessage(m.text, m.role, null, false));
-    }
-
-    function parseUserName(rawText) {
-      const match = rawText.match(/(?:benim adim|adim|ismim|ben)\s+([A-Za-zÇĞİÖŞÜçğıöşü]{2,})/i);
-      if (!match) return null;
-      const name = match[1].trim();
-      return name.charAt(0).toLocaleUpperCase('tr-TR') + name.slice(1).toLocaleLowerCase('tr-TR');
-    }
-
-    function rememberPreference(normalized, rawText) {
-      if (/(severim|hoslanirim|tercihim|favorim)/.test(normalized)) {
-        Brain.memory.preferences.push(rawText.slice(0, 120));
-        Brain.memory.preferences = Brain.memory.preferences.slice(-8);
-      }
-    }
-
-    function calculateExpression(raw) {
-      const expr = raw.replace(',', '.').match(/[0-9+\-*/().\s]+/g)?.join('').trim();
-      if (!expr || !/\d/.test(expr)) return null;
-      if (!/^[0-9+\-*/().\s]+$/.test(expr)) return null;
-      try {
-        const result = Function(`"use strict"; return (${expr});`)();
-        if (!Number.isFinite(result)) return 'Bu işlemde geçerli bir sonuç çıkmadı.';
-        return `Sonuç: ${result}`;
-      } catch {
-        return 'İşlemi çözerken hata oldu. Örn: 12/(3+1) yazabilirsiniz.';
-      }
-    }
-
-    function detectIntent(normalized, rawText) {
-      if (/^(selam|merhaba|hey|iyi gunler)/.test(normalized)) return 'greet';
-      if (/(nasilsin|naber|iyi misin)/.test(normalized)) return 'mood_check';
-      if (/(beni hatirliyor musun|hafizanda var miyim|beni taniyor musun)/.test(normalized)) return 'recall_user';
-      if (/(saat kac|suan saat|kacta)/.test(normalized)) return 'time';
-      if (/(bugun tarih|tarih ne|hangi gun)/.test(normalized)) return 'date';
-      if (/(yardim|neler yapabilirsin|ne yapabilirsin)/.test(normalized)) return 'help';
-      if (/(motivasyon|motive et)/.test(normalized)) return 'motivation';
-      if (/(f[ıi]kra|saka)/.test(normalized)) return 'joke';
-      if (/(adim ne|benim adim ne|isimim ne|adimi hatirliyor musun)/.test(normalized)) return 'recall_name';
-      if (parseUserName(rawText)) return 'set_name';
-      if (/(hesapla|kac eder|\d+\s*[+\-*/])/.test(normalized)) return 'calculate';
-      if (/(javascript|python|yapay zeka|turkiye)/.test(normalized)) return 'knowledge';
-      if (/(plan|program|duzen|hedef|calisma plani)/.test(normalized)) return 'planning';
-      if (/(kararsiz|kararsizim|secemiyorum|kafa karisik|ne yapacagimi bilmiyorum)/.test(normalized)) return 'decision_support';
-      if (/(uzgun|stres|kayg|bunaldim|yorgun|kotu hissediyorum)/.test(normalized)) return 'emotional_support';
-      return 'fallback';
-    }
-
-    function composePlanReply(rawText) {
-      Brain.memory.goal = rawText;
-      return [
-        'Tamam, bunu birlikte planlayalım. Sana 3 adımlı net bir plan öneriyorum:',
-        '1) Hedefi netleştir: Bu konuyu neden yapmak istediğini 1 cümle ile yaz.',
-        '2) İlk küçük adım: 20-30 dakikada tamamlanacak bir görev seç.',
-        '3) Takip: Bugün bitince bana "tamamlandı" yaz, bir sonraki adımı birlikte belirleyelim.'
-      ].join('\n');
-    }
-
-    function composeDecisionReply() {
-      return [
-        randomFrom(Brain.templates.empathy),
-        'Karar vermek için şu mini yöntemi deneyelim:',
-        '• Seçenekleri yaz (A/B/C)',
-        '• Her seçenek için + / - / risk notu ver',
-        '• En çok değerine uyan seçeneği 24 saat test et',
-        'İstersen seçeneklerini yaz, birlikte puanlayayım.'
-      ].join('\n');
-    }
-
-    function composeEmotionalReply() {
-      Brain.memory.mood = 'zorlanıyor';
-      return [
-        randomFrom(Brain.templates.empathy),
-        'Hemen uygulanabilir kısa bir rahatlama rutini:',
-        '1) 4 saniye nefes al, 4 saniye tut, 6 saniye ver (5 tur)',
-        '2) Şu an kontrol edebildiğin 1 küçük işi seç',
-        '3) O işi 10 dakika yap ve bana sonucu yaz'
-      ].join('\n');
-    }
-
-    function think(rawText) {
-      const normalized = normalizeText(rawText);
-      const intent = detectIntent(normalized, rawText);
-      Brain.memory.lastQuestion = rawText;
-      rememberPreference(normalized, rawText);
-
-      if (intent === 'set_name') {
-        const found = parseUserName(rawText);
-        Brain.memory.userName = found;
-        return `Memnun oldum ${found}! Seni hafızama kaydettim.`;
-      }
-
-      if (intent === 'recall_name') {
-        return Brain.memory.userName
-          ? `Evet, adını hatırlıyorum: ${Brain.memory.userName}.`
-          : 'Henüz adını söylemedin. "Benim adım ..." yazabilirsin.';
-      }
-
-      if (intent === 'recall_user') {
-        const name = Brain.memory.userName ? `Adın ${Brain.memory.userName}. ` : '';
-        const goal = Brain.memory.goal ? `Son hedef konuşmamız: "${Brain.memory.goal.slice(0, 70)}...". ` : '';
-        return `${name}${goal}Evet, seni önceki konuşmalardan hatırlıyorum.`;
-      }
-
-      if (intent === 'greet') {
-        return `Merhaba${Brain.memory.userName ? ' ' + Brain.memory.userName : ''}! Ben Hakan ÇELİK, konuşarak birlikte düşünebiliriz.`;
-      }
-
-      if (intent === 'mood_check') return 'İyiyim, teşekkür ederim. Senin için bugün en önemli konu neyse oradan başlayalım.';
-      if (intent === 'time') return `Şu an saat ${new Date().toLocaleTimeString('tr-TR')}.`;
-      if (intent === 'date') return `Bugünün tarihi: ${new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}.`;
-
-      if (intent === 'help') {
-        return 'Yapabildiklerim:\n• Soruyu anlayıp uygun konuşma tarzı seçerim\n• Plan çıkarırım, karar vermene yardım ederim\n• Duygusal destek ve motivasyon verebilirim\n• Temel bilgi, hesaplama, saat/tarih\n• Kalıcı hafıza (isim, hedef, tercih)\n• Dosya/fotoğraf eklerini gösteririm\n\nNot: Bu sürümde internet kullanılmıyor; tamamen yerel çalışıyorum.';
-      }
-
-      if (intent === 'motivation') return randomFrom(Brain.templates.motivation);
-      if (intent === 'joke') return 'Robotlar neden tartışmaz? Çünkü gereksiz döngüye girmek istemezler. 😄';
-      if (intent === 'planning') return composePlanReply(rawText);
-      if (intent === 'decision_support') return composeDecisionReply();
-      if (intent === 'emotional_support') return composeEmotionalReply();
-
-      if (intent === 'calculate') {
-        const calc = calculateExpression(normalized);
-        return calc ?? 'İşlem göremedim. Örn: (12+8)/2 kaç eder?';
-      }
-
-      if (intent === 'knowledge') {
-        for (const key of Object.keys(Brain.knowledge)) {
-          if (normalized.includes(key)) {
-            Brain.memory.lastTopic = key;
-            return `${Brain.knowledge[key]}\nİstersen bunu basit örneklerle de anlatabilirim.`;
-          }
-        }
-      }
-
-      if ((/daha fazla|detay|ac/.test(normalized)) && Brain.memory.lastTopic) {
-        return `${Brain.knowledge[Brain.memory.lastTopic]}\nEk olarak bunu günlük hayattan bir örnekle de açıklayabilirim.`;
-      }
-
-      return randomFrom(Brain.templates.fallback);
-    }
-
-    async function sendMessage(text) {
-      const attachments = pendingFiles.length
-        ? pendingFiles.map((f) => ({ ...f, previewUrl: f.type.startsWith('image/') ? URL.createObjectURL(f) : null }))
-        : null;
-
-      addMessage(text, 'user', attachments);
+  async function sendMessage(text) {
+    addMessage(text, 'user');
+    if (pendingFiles.length) {
+      addMessage(`Ek dosyalar: ${pendingFiles.map((f) => f.name).join(', ')}`, 'user');
       pendingFiles = [];
       fileInput.value = '';
-
-      typing.style.display = 'block';
-      await new Promise((resolve) => setTimeout(resolve, 300 + Math.floor(Math.random() * 320)));
-      const response = think(text);
+    }
+    typing.style.display = 'block';
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId, message: text })
+      });
+      if (!res.ok) throw new Error('chat');
+      const data = await res.json();
+      const sourceText = data.sources?.length ? `\n\nKaynaklar: ${data.sources.map((s) => s.source).join(', ')}` : '';
+      const meta = `\n\n[${data.reasoning_summary} | güven=${data.confidence}]`;
+      addMessage(`${data.reply}${sourceText}${meta}`, 'assistant');
+      await refreshMemory();
+    } catch {
+      addMessage('Sunucuya bağlanamadım. `python launcher.py` ile API sunucusunu başlatıp tekrar dener misin?', 'assistant');
+    } finally {
       typing.style.display = 'none';
-      addMessage(response, 'bot');
-
-      saveBrain();
-      updateMemoryInfo();
     }
+  }
 
-    function onFilesPicked(files) {
-      if (!files.length) return;
-      pendingFiles = files.slice(0, 5).map((f) => ({ name: f.name, size: f.size, type: f.type || '' }));
-      const names = pendingFiles.map((f) => `• ${f.name}`).join('\n');
-      addMessage(`Yüklenecek dosyalar hazır:\n${names}`, 'bot');
-    }
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const t = promptInput.value.trim();
+    if (!t) return;
+    promptInput.value = '';
+    await sendMessage(t);
+  });
 
-    function resetMemory() {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(CHAT_LOG_KEY);
-      location.reload();
-    }
+  quickActions.addEventListener('click', async (e) => {
+    if (!(e.target instanceof HTMLButtonElement)) return;
+    await sendMessage(e.target.textContent || 'Merhaba');
+  });
 
-    restoreChatLog();
-    updateMemoryInfo();
+  clearMemoryBtn.addEventListener('click', () => {
+    localStorage.removeItem(CHAT_KEY);
+    localStorage.removeItem(SESSION_KEY);
+    location.reload();
+  });
 
-    if (!chat.children.length) {
-      addMessage('Merhaba! Ben Hakan ÇELİK. ChatGPT/Copilot tarzı konuşma deneyimi için yerel beyin ve hafıza ile çalışıyorum.', 'bot');
-    }
+  uploadBtn.addEventListener('click', () => fileInput.click());
+  uploadBtn2.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => {
+    pendingFiles = Array.from(e.target.files || []);
+    if (pendingFiles.length) addMessage(`Yüklenecek dosyalar hazır: ${pendingFiles.map((f) => f.name).join(', ')}`, 'assistant');
+  });
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const text = promptInput.value.trim();
-      if (!text && !pendingFiles.length) return;
-      promptInput.value = '';
-      await sendMessage(text || 'Ek dosya gönderiyorum.');
-    });
-
-    quickActions.addEventListener('click', async (e) => {
-      const target = e.target;
-      if (!(target instanceof HTMLButtonElement)) return;
-      await sendMessage(target.textContent || 'Merhaba');
-    });
-
-    uploadBtn.addEventListener('click', () => fileInput.click());
-    uploadBtn2.addEventListener('click', () => fileInput.click());
-    clearMemoryBtn.addEventListener('click', resetMemory);
-    fileInput.addEventListener('change', (e) => onFilesPicked(Array.from(e.target.files || [])));
-  </script>
+  restoreChat();
+  refreshMemory();
+</script>
 </body>
 </html>

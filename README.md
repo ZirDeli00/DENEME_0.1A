@@ -1,24 +1,28 @@
 # Hakan ÇELİK Yapay Zeka Sohbet
 
-Bu proje, tek bir HTML dosyasıyla çalışan ve tamamen **yerel/offline** çalışan, ChatGPT-Copilot-Grok tarzına benzetilmiş bir sohbet arayüzüdür.
+Bu proje artık statik HTML yerine **Python API arka planı + dinamik sohbet motoru** ile çalışır.
 
-## Dosyalar
-- `Hakan_CELIK_Chat.html`: Modern sohbet arayüzü + gelişmiş yerel beyin + kalıcı hafıza + dosya/fotoğraf ekleme.
-- `launcher.py`: HTML dosyasını varsayılan tarayıcıda açar.
-- `build_exe.bat`: Windows'ta `launcher.py` dosyasından `HakanCELIKChat.exe` üretir.
+## Mimari
+- `Hakan_CELIK_Chat.html`: Sohbet arayüzü (frontend)
+- `launcher.py`: Yerel API sunucusu + yapay zeka mantığı + bellek + RAG-lite
+- `knowledge_base/*.txt`: Bilgi tabanı dosyaları (RAG için)
+- `build_exe.bat`: Windows EXE paketleme
 
-## Öne Çıkan Özellikler
-- İnternet olmadan çalışan yerel "beyin"
-- Gelişmiş niyet algılama (planlama, karar desteği, duygusal destek, bilgi, hesaplama)
-- Daha insan gibi konuşma: empatik ve adım adım yanıtlar
-- **Kalıcı hafıza** (`localStorage`): isim, hedef, tercih, oturum bilgisi ve konuşma geçmişini hatırlama
-- Hafızayı sıfırlama butonu
-- Dosya ve fotoğraf yükleme, mesaj altında ekli gösterim
+## Geliştirilen AI Özellikleri
+- Statik if/else yerine **olasılıksal niyet skorlama**
+- **Short-term memory**: Son 5-10 mesaj bağlamını saklayıp yanıta dahil etme
+- **Chain-of-thought tarzı** iç akıl yürütme özeti (niyet/güven)
+- Python backend üzerinde merkezi karar mekanizması
+- Basit **RAG-lite**: `knowledge_base` içinde arama yapıp kaynaklı cevap üretme
+- Kalıcı oturum belleği: isim/hedef/tercih vb. bilgileri `.hakan_memory.json` içinde tutma
 
-## HTML ile açma
-Windows'ta `Hakan_CELIK_Chat.html` dosyasına çift tıklayın.
+## Çalıştırma
+1. Sunucuyu başlatın:
+   ```bash
+   python launcher.py
+   ```
+2. Tarayıcıdan açın:
+   - `http://127.0.0.1:8000`
 
-## EXE ile açma (Windows)
-1. Python kurulu olmalı.
-2. `build_exe.bat` dosyasını çalıştırın.
-3. Oluşan `dist/HakanCELIKChat.exe` dosyasını çalıştırarak sohbet uygulamasını açın.
+## Windows EXE
+- `build_exe.bat` API sunucusunu ve gerekli dosyaları tek EXE olarak paketler.
