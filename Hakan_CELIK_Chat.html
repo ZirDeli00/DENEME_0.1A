@@ -18,7 +18,9 @@
       --user: linear-gradient(135deg, #22d3ee, #38bdf8);
       --bot: rgba(15, 23, 42, 0.88);
     }
+
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       min-height: 100vh;
@@ -32,18 +34,20 @@
         var(--bg);
       padding: 20px;
     }
+
     .app {
-      width: min(980px, 100%);
-      height: min(780px, calc(100vh - 40px));
+      width: min(1000px, 100%);
+      height: min(800px, calc(100vh - 40px));
       border-radius: 20px;
       border: 1px solid var(--border);
       background: var(--panel);
       box-shadow: 0 24px 80px rgba(2, 6, 23, 0.55);
       backdrop-filter: blur(10px);
       display: grid;
-      grid-template-rows: auto auto 1fr auto auto;
+      grid-template-rows: auto auto auto 1fr auto auto;
       overflow: hidden;
     }
+
     header {
       padding: 16px 20px;
       border-bottom: 1px solid var(--border);
@@ -52,11 +56,12 @@
       justify-content: space-between;
       background: linear-gradient(90deg, rgba(34, 211, 238, 0.12), rgba(167, 139, 250, 0.12));
     }
+
     .title { font-size: 1.1rem; font-weight: 700; }
     .subtitle { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
     .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 12px #4ade80; }
 
-    .toolbar, .quick-actions {
+    .toolbar, .memory-bar, .quick-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
@@ -66,7 +71,9 @@
       align-items: center;
       justify-content: space-between;
     }
-    .toolbar-left { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    .toolbar-left, .memory-left { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
     .chip, .tool-btn {
       border: 1px solid rgba(56, 189, 248, 0.35);
       background: rgba(30, 41, 59, 0.8);
@@ -76,26 +83,59 @@
       font-size: 0.82rem;
       cursor: pointer;
     }
+
     .tool-btn { border-radius: 10px; }
     .chip:hover, .tool-btn:hover { border-color: rgba(34, 211, 238, 0.9); color: #fff; }
 
-    #chat { padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .memory-pill {
+      font-size: 0.77rem;
+      color: #bae6fd;
+      background: rgba(14, 116, 144, 0.2);
+      border: 1px solid rgba(34, 211, 238, 0.4);
+      border-radius: 999px;
+      padding: 6px 10px;
+    }
+
+    #chat {
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
     .row { display: flex; gap: 9px; align-items: flex-end; max-width: 92%; }
     .row.user-row { margin-left: auto; flex-direction: row-reverse; }
+
     .avatar {
-      width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
-      font-size: 0.75rem; font-weight: 700; border: 1px solid var(--border); background: rgba(2, 6, 23, 0.7);
-      color: #bfdbfe; flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: rgba(2, 6, 23, 0.7);
+      color: #bfdbfe;
+      flex-shrink: 0;
     }
+
     .msg {
-      padding: 11px 13px; border-radius: 14px; white-space: pre-wrap; line-height: 1.42;
-      border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(2, 6, 23, 0.3);
+      padding: 11px 13px;
+      border-radius: 14px;
+      white-space: pre-wrap;
+      line-height: 1.42;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 24px rgba(2, 6, 23, 0.3);
     }
+
     .bot { background: var(--bot); }
     .user { background: var(--user); color: #062135; border: none; font-weight: 600; }
     .typing { color: var(--muted); font-size: 0.85rem; font-style: italic; margin-left: 40px; display: none; }
 
     .attachment-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
     .attachment-item {
       border: 1px solid rgba(148, 163, 184, 0.45);
       background: rgba(2, 6, 23, 0.35);
@@ -105,8 +145,13 @@
       max-width: 220px;
       overflow-wrap: anywhere;
     }
+
     .attachment-item img {
-      width: 100%; max-height: 120px; object-fit: cover; border-radius: 6px; margin-bottom: 6px;
+      width: 100%;
+      max-height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 6px;
     }
 
     form {
@@ -118,16 +163,30 @@
       background: var(--panel-soft);
       align-items: center;
     }
+
     input[type="text"] {
-      width: 100%; font-size: 1rem; padding: 12px; border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.4); background: rgba(15, 23, 42, 0.88); color: var(--text); outline: none;
+      width: 100%;
+      font-size: 1rem;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.88);
+      color: var(--text);
+      outline: none;
     }
+
     input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.16); }
+
     .send-btn {
-      border: none; border-radius: 10px; padding: 12px 16px;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 16px;
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #03142e; font-weight: 700; cursor: pointer;
+      color: #03142e;
+      font-weight: 700;
+      cursor: pointer;
     }
+
     .hint { font-size: 0.78rem; color: var(--muted); padding: 0 15px 14px; }
 
     @media (max-width: 700px) {
@@ -143,7 +202,7 @@
     <header>
       <div>
         <div class="title">Hakan ÇELİK - Yapay Zeka Sohbet</div>
-        <div class="subtitle">Yerel beyin: insan gibi düşünme, karar verme ve konuşma</div>
+        <div class="subtitle">Yerel LLM tarzı beyin + kalıcı hafıza (offline)</div>
       </div>
       <div class="status-dot" title="Çevrimiçi"></div>
     </header>
@@ -152,14 +211,21 @@
       <div class="toolbar-left">
         <button type="button" class="tool-btn" id="uploadBtn">📎 Dosya / Fotoğraf Ekle</button>
       </div>
-      <small style="color:var(--muted)">İnternet kapalı; tüm yanıtlar yerel karar mekanizmasıyla üretilir.</small>
+      <small style="color:var(--muted)">Model benzeri: niyet analizi, bağlam takibi, hafıza.</small>
+    </div>
+
+    <div class="memory-bar">
+      <div class="memory-left">
+        <span class="memory-pill" id="memoryInfo">Hafıza: yükleniyor...</span>
+      </div>
+      <button type="button" class="tool-btn" id="clearMemoryBtn">🧠 Hafızayı Sıfırla</button>
     </div>
 
     <div class="quick-actions" id="quickActions">
       <button type="button" class="chip">Benim adım Ahmet</button>
+      <button type="button" class="chip">Beni hatırlıyor musun?</button>
       <button type="button" class="chip">Bugün nasıl plan yapayım?</button>
       <button type="button" class="chip">Kafam çok karışık</button>
-      <button type="button" class="chip">2+5*3 hesapla</button>
       <button type="button" class="chip">Kısa bir motivasyon ver</button>
     </div>
 
@@ -172,10 +238,13 @@
       <button class="send-btn" type="submit">Gönder</button>
       <input id="fileInput" type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xlsx" hidden />
     </form>
-    <div class="hint">Hakan ÇELİK önce sorunun amacını anlar, sonra empatik ve adım adım yanıt verir.</div>
+    <div class="hint">Bu sürüm internet kullanmaz; tüm konuşma ve hatırlama tarayıcı belleğinde yerel yapılır.</div>
   </div>
 
   <script>
+    const STORAGE_KEY = 'hakan_celik_brain_v2';
+    const CHAT_LOG_KEY = 'hakan_celik_chat_v2';
+
     const chat = document.getElementById('chat');
     const form = document.getElementById('chatForm');
     const promptInput = document.getElementById('prompt');
@@ -184,16 +253,21 @@
     const uploadBtn = document.getElementById('uploadBtn');
     const uploadBtn2 = document.getElementById('uploadBtn2');
     const fileInput = document.getElementById('fileInput');
+    const clearMemoryBtn = document.getElementById('clearMemoryBtn');
+    const memoryInfo = document.getElementById('memoryInfo');
 
     let pendingFiles = [];
 
-    const Brain = {
+    const defaultBrain = {
       memory: {
         userName: null,
         mood: null,
         goal: null,
+        preferences: [],
         lastTopic: null,
-        lastQuestion: null
+        lastQuestion: null,
+        sessionCount: 1,
+        lastSeenAt: new Date().toISOString()
       },
       knowledge: {
         javascript: 'JavaScript, web uygulamalarının etkileşimli davranışlarını yöneten programlama dilidir.',
@@ -220,6 +294,35 @@
       }
     };
 
+    function loadBrain() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(defaultBrain);
+        const parsed = JSON.parse(raw);
+        return {
+          ...structuredClone(defaultBrain),
+          ...parsed,
+          memory: { ...structuredClone(defaultBrain).memory, ...(parsed.memory || {}) }
+        };
+      } catch {
+        return structuredClone(defaultBrain);
+      }
+    }
+
+    const Brain = loadBrain();
+    Brain.memory.sessionCount = (Brain.memory.sessionCount || 0) + 1;
+    Brain.memory.lastSeenAt = new Date().toISOString();
+
+    function saveBrain() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(Brain));
+    }
+
+    function updateMemoryInfo() {
+      const name = Brain.memory.userName || 'Bilinmiyor';
+      const pref = Brain.memory.preferences.length ? Brain.memory.preferences.slice(-2).join(', ') : 'Yok';
+      memoryInfo.textContent = `Hafıza | İsim: ${name} | Tercih: ${pref} | Oturum: ${Brain.memory.sessionCount}`;
+    }
+
     function normalizeText(text) {
       return text
         .toLocaleLowerCase('tr-TR')
@@ -229,9 +332,11 @@
         .trim();
     }
 
-    function randomFrom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function randomFrom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
 
-    function addMessage(text, role, attachments = null) {
+    function addMessage(text, role, attachments = null, persist = true) {
       const row = document.createElement('div');
       row.className = `row ${role === 'user' ? 'user-row' : 'bot-row'}`;
 
@@ -251,9 +356,9 @@
         attachments.forEach((file) => {
           const item = document.createElement('div');
           item.className = 'attachment-item';
-          if (file.type.startsWith('image/')) {
+          if (file.type && file.type.startsWith('image/') && file.previewUrl) {
             const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
+            img.src = file.previewUrl;
             img.alt = file.name;
             item.appendChild(img);
           }
@@ -267,6 +372,19 @@
 
       chat.appendChild(row);
       chat.scrollTop = chat.scrollHeight;
+
+      if (persist) persistChatMessage({ role, text });
+    }
+
+    function persistChatMessage(message) {
+      const existing = JSON.parse(localStorage.getItem(CHAT_LOG_KEY) || '[]');
+      existing.push(message);
+      localStorage.setItem(CHAT_LOG_KEY, JSON.stringify(existing.slice(-80)));
+    }
+
+    function restoreChatLog() {
+      const messages = JSON.parse(localStorage.getItem(CHAT_LOG_KEY) || '[]');
+      messages.forEach((m) => addMessage(m.text, m.role, null, false));
     }
 
     function parseUserName(rawText) {
@@ -274,6 +392,13 @@
       if (!match) return null;
       const name = match[1].trim();
       return name.charAt(0).toLocaleUpperCase('tr-TR') + name.slice(1).toLocaleLowerCase('tr-TR');
+    }
+
+    function rememberPreference(normalized, rawText) {
+      if (/(severim|hoslanirim|tercihim|favorim)/.test(normalized)) {
+        Brain.memory.preferences.push(rawText.slice(0, 120));
+        Brain.memory.preferences = Brain.memory.preferences.slice(-8);
+      }
     }
 
     function calculateExpression(raw) {
@@ -292,6 +417,7 @@
     function detectIntent(normalized, rawText) {
       if (/^(selam|merhaba|hey|iyi gunler)/.test(normalized)) return 'greet';
       if (/(nasilsin|naber|iyi misin)/.test(normalized)) return 'mood_check';
+      if (/(beni hatirliyor musun|hafizanda var miyim|beni taniyor musun)/.test(normalized)) return 'recall_user';
       if (/(saat kac|suan saat|kacta)/.test(normalized)) return 'time';
       if (/(bugun tarih|tarih ne|hangi gun)/.test(normalized)) return 'date';
       if (/(yardim|neler yapabilirsin|ne yapabilirsin)/.test(normalized)) return 'help';
@@ -319,7 +445,7 @@
 
     function composeDecisionReply() {
       return [
-        `${randomFrom(Brain.templates.empathy)}`,
+        randomFrom(Brain.templates.empathy),
         'Karar vermek için şu mini yöntemi deneyelim:',
         '• Seçenekleri yaz (A/B/C)',
         '• Her seçenek için + / - / risk notu ver',
@@ -331,7 +457,7 @@
     function composeEmotionalReply() {
       Brain.memory.mood = 'zorlanıyor';
       return [
-        `${randomFrom(Brain.templates.empathy)}`,
+        randomFrom(Brain.templates.empathy),
         'Hemen uygulanabilir kısa bir rahatlama rutini:',
         '1) 4 saniye nefes al, 4 saniye tut, 6 saniye ver (5 tur)',
         '2) Şu an kontrol edebildiğin 1 küçük işi seç',
@@ -343,11 +469,12 @@
       const normalized = normalizeText(rawText);
       const intent = detectIntent(normalized, rawText);
       Brain.memory.lastQuestion = rawText;
+      rememberPreference(normalized, rawText);
 
       if (intent === 'set_name') {
         const found = parseUserName(rawText);
         Brain.memory.userName = found;
-        return `Memnun oldum ${found}! Seni hatırlayacağım.`;
+        return `Memnun oldum ${found}! Seni hafızama kaydettim.`;
       }
 
       if (intent === 'recall_name') {
@@ -356,13 +483,22 @@
           : 'Henüz adını söylemedin. "Benim adım ..." yazabilirsin.';
       }
 
-      if (intent === 'greet') return `Merhaba${Brain.memory.userName ? ' ' + Brain.memory.userName : ''}! Ben Hakan ÇELİK, konuşarak birlikte düşünebiliriz.`;
+      if (intent === 'recall_user') {
+        const name = Brain.memory.userName ? `Adın ${Brain.memory.userName}. ` : '';
+        const goal = Brain.memory.goal ? `Son hedef konuşmamız: "${Brain.memory.goal.slice(0, 70)}...". ` : '';
+        return `${name}${goal}Evet, seni önceki konuşmalardan hatırlıyorum.`;
+      }
+
+      if (intent === 'greet') {
+        return `Merhaba${Brain.memory.userName ? ' ' + Brain.memory.userName : ''}! Ben Hakan ÇELİK, konuşarak birlikte düşünebiliriz.`;
+      }
+
       if (intent === 'mood_check') return 'İyiyim, teşekkür ederim. Senin için bugün en önemli konu neyse oradan başlayalım.';
       if (intent === 'time') return `Şu an saat ${new Date().toLocaleTimeString('tr-TR')}.`;
       if (intent === 'date') return `Bugünün tarihi: ${new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}.`;
 
       if (intent === 'help') {
-        return 'Yapabildiklerim:\n• Soruyu anlayıp uygun konuşma tarzı seçerim\n• Plan çıkarırım, karar vermene yardım ederim\n• Duygusal destek ve motivasyon verebilirim\n• Temel bilgi, hesaplama, saat/tarih\n• Dosya/fotoğraf eklerini gösteririm\n\nNot: Bu sürümde internet kullanılmıyor; tamamen yerel çalışıyorum.';
+        return 'Yapabildiklerim:\n• Soruyu anlayıp uygun konuşma tarzı seçerim\n• Plan çıkarırım, karar vermene yardım ederim\n• Duygusal destek ve motivasyon verebilirim\n• Temel bilgi, hesaplama, saat/tarih\n• Kalıcı hafıza (isim, hedef, tercih)\n• Dosya/fotoğraf eklerini gösteririm\n\nNot: Bu sürümde internet kullanılmıyor; tamamen yerel çalışıyorum.';
       }
 
       if (intent === 'motivation') return randomFrom(Brain.templates.motivation);
@@ -393,26 +529,43 @@
     }
 
     async function sendMessage(text) {
-      const attachments = pendingFiles.length ? [...pendingFiles] : null;
+      const attachments = pendingFiles.length
+        ? pendingFiles.map((f) => ({ ...f, previewUrl: f.type.startsWith('image/') ? URL.createObjectURL(f) : null }))
+        : null;
+
       addMessage(text, 'user', attachments);
       pendingFiles = [];
       fileInput.value = '';
 
       typing.style.display = 'block';
-      await new Promise((resolve) => setTimeout(resolve, 320 + Math.floor(Math.random() * 320)));
+      await new Promise((resolve) => setTimeout(resolve, 300 + Math.floor(Math.random() * 320)));
       const response = think(text);
       typing.style.display = 'none';
       addMessage(response, 'bot');
+
+      saveBrain();
+      updateMemoryInfo();
     }
 
     function onFilesPicked(files) {
       if (!files.length) return;
-      pendingFiles = files.slice(0, 5);
+      pendingFiles = files.slice(0, 5).map((f) => ({ name: f.name, size: f.size, type: f.type || '' }));
       const names = pendingFiles.map((f) => `• ${f.name}`).join('\n');
       addMessage(`Yüklenecek dosyalar hazır:\n${names}`, 'bot');
     }
 
-    addMessage('Merhaba! Ben Hakan ÇELİK. Bu sürümde internet olmadan, tamamen yerel bir beyin gibi seninle konuşuyorum.', 'bot');
+    function resetMemory() {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(CHAT_LOG_KEY);
+      location.reload();
+    }
+
+    restoreChatLog();
+    updateMemoryInfo();
+
+    if (!chat.children.length) {
+      addMessage('Merhaba! Ben Hakan ÇELİK. ChatGPT/Copilot tarzı konuşma deneyimi için yerel beyin ve hafıza ile çalışıyorum.', 'bot');
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -430,6 +583,7 @@
 
     uploadBtn.addEventListener('click', () => fileInput.click());
     uploadBtn2.addEventListener('click', () => fileInput.click());
+    clearMemoryBtn.addEventListener('click', resetMemory);
     fileInput.addEventListener('change', (e) => onFilesPicked(Array.from(e.target.files || [])));
   </script>
 </body>
