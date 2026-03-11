@@ -20,6 +20,7 @@
 
     .game-wrapper {
       text-align: center;
+      position: relative;
     }
 
     canvas {
@@ -30,22 +31,85 @@
       margin-inline: auto;
     }
 
-    p {
+    .hint {
       margin-top: 12px;
       color: #0f172a;
       font-size: 14px;
+    }
+
+    .settings {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+
+    .settings.open {
+      display: flex;
+    }
+
+    .panel {
+      width: 320px;
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: left;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .panel h2 { margin: 0 0 10px; }
+    .panel label { display: block; margin: 10px 0 6px; font-weight: 700; }
+    .panel input[type="range"] { width: 100%; }
+    .panel small { color: #334155; display: block; margin-top: 8px; }
+    .panel .row { display: flex; gap: 8px; margin-top: 12px; }
+    .panel button, .panel a {
+      border: 0;
+      background: #0ea5e9;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .panel button.secondary {
+      background: #334155;
     }
   </style>
 </head>
 <body>
   <main class="game-wrapper">
     <canvas id="game" width="400" height="600" aria-label="Flipy Bird oyunu"></canvas>
-    <p>Boşluk (Space) veya tıkla: zıpla • Yeniden başlat: R</p>
+    <div id="settings" class="settings" aria-hidden="true">
+      <section class="panel" aria-label="Ayarlar menüsü">
+        <h2>Ayarlar</h2>
+        <label for="volume">Müzik Sesi</label>
+        <input id="volume" type="range" min="0" max="1" step="0.01" value="0.4" />
+        <small id="musicStatus">Müzik: hazır</small>
+        <div class="row">
+          <button id="toggleMusic">Müziği Başlat / Durdur</button>
+          <button id="closeSettings" class="secondary">Kapat (ESC)</button>
+        </div>
+        <small>Spotify linki: bu parça tarayıcıda direkt stream edilemez, linke tıklayıp dinleyebilirsin.</small>
+        <div class="row">
+          <a href="https://open.spotify.com/intl-tr/track/62n9gOtXkZZM4ielTvJI00?si=374543d1f2da4b47" target="_blank" rel="noopener noreferrer">Spotify'da Aç</a>
+        </div>
+      </section>
+    </div>
+    <p class="hint">Boşluk (Space) veya tıkla: zıpla • Yeniden başlat: R • Ayarlar: ESC</p>
   </main>
 
   <script>
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
+    const settingsMenu = document.getElementById('settings');
+    const volumeSlider = document.getElementById('volume');
+    const musicStatus = document.getElementById('musicStatus');
+    const toggleMusicBtn = document.getElementById('toggleMusic');
+    const closeSettingsBtn = document.getElementById('closeSettings');
 
     const gravity = 0.4;
     const jumpPower = -7.5;
@@ -53,21 +117,36 @@
     const pipeGap = 150;
     const pipeSpeed = 2.2;
 
+    const bgMusic = new Audio('music.mp3');
+    bgMusic.loop = true;
+    bgMusic.volume = Number(volumeSlider.value);
+
     let bird;
     let pipes;
     let score;
     let best;
     let frame;
     let gameOver;
+    let settingsOpen = false;
+
+    function setMusicStatus(text) {
+      musicStatus.textContent = text;
+    }
+
+    function openSettings() {
+      settingsOpen = true;
+      settingsMenu.classList.add('open');
+      settingsMenu.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeSettings() {
+      settingsOpen = false;
+      settingsMenu.classList.remove('open');
+      settingsMenu.setAttribute('aria-hidden', 'true');
+    }
 
     function resetGame() {
-      bird = {
-        x: 100,
-        y: canvas.height / 2,
-        size: 16,
-        velocity: 0
-      };
-
+      bird = { x: 100, y: canvas.height / 2, size: 16, velocity: 0 };
       pipes = [];
       score = 0;
       frame = 0;
@@ -78,16 +157,11 @@
       const minTop = 60;
       const maxTop = canvas.height - pipeGap - 120;
       const topHeight = Math.floor(Math.random() * (maxTop - minTop + 1) + minTop);
-
-      pipes.push({
-        x: canvas.width,
-        topHeight,
-        passed: false
-      });
+      pipes.push({ x: canvas.width, topHeight, passed: false });
     }
 
     function jump() {
-      if (gameOver) return;
+      if (gameOver || settingsOpen) return;
       bird.velocity = jumpPower;
     }
 
@@ -96,33 +170,26 @@
       const birdRight = bird.x + bird.size;
       const birdTop = bird.y - bird.size;
       const birdBottom = bird.y + bird.size;
-
       const pipeLeft = pipe.x;
       const pipeRight = pipe.x + pipeWidth;
       const topPipeBottom = pipe.topHeight;
       const bottomPipeTop = pipe.topHeight + pipeGap;
-
       const hitsHorizontally = birdRight > pipeLeft && birdLeft < pipeRight;
       const hitsTopPipe = birdTop < topPipeBottom;
       const hitsBottomPipe = birdBottom > bottomPipeTop;
-
       return hitsHorizontally && (hitsTopPipe || hitsBottomPipe);
     }
 
     function update() {
-      if (gameOver) return;
-
+      if (gameOver || settingsOpen) return;
       frame += 1;
       bird.velocity += gravity;
       bird.y += bird.velocity;
 
-      if (frame % 95 === 0) {
-        spawnPipe();
-      }
+      if (frame % 95 === 0) spawnPipe();
 
       pipes.forEach(pipe => {
         pipe.x -= pipeSpeed;
-
         if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
           pipe.passed = true;
           score += 1;
@@ -131,13 +198,9 @@
       });
 
       pipes = pipes.filter(pipe => pipe.x + pipeWidth > -10);
-
       const hitGroundOrCeiling = bird.y + bird.size > canvas.height || bird.y - bird.size < 0;
       const hitPipe = pipes.some(intersectsPipe);
-
-      if (hitGroundOrCeiling || hitPipe) {
-        gameOver = true;
-      }
+      if (hitGroundOrCeiling || hitPipe) gameOver = true;
     }
 
     function drawBird() {
@@ -164,14 +227,12 @@
       ctx.fillStyle = '#0f172a';
       ctx.font = 'bold 24px Arial';
       ctx.fillText(`Skor: ${score}`, 16, 36);
-
       ctx.font = '16px Arial';
       ctx.fillText(`En iyi: ${best}`, 16, 60);
 
       if (gameOver) {
         ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
         ctx.fillRect(50, 240, 300, 130);
-
         ctx.fillStyle = '#f8fafc';
         ctx.font = 'bold 26px Arial';
         ctx.fillText('Oyun Bitti', 125, 285);
@@ -183,7 +244,6 @@
     function drawBackground() {
       ctx.fillStyle = '#87ceeb';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
       ctx.fillStyle = '#93c5fd';
       ctx.fillRect(0, canvas.height - 70, canvas.width, 70);
     }
@@ -197,15 +257,45 @@
       requestAnimationFrame(loop);
     }
 
+    async function toggleMusic() {
+      if (bgMusic.paused) {
+        try {
+          await bgMusic.play();
+          setMusicStatus('Müzik: çalıyor (music.mp3)');
+        } catch {
+          setMusicStatus('Müzik başlatılamadı. Klasöre music.mp3 ekleyin.');
+        }
+      } else {
+        bgMusic.pause();
+        setMusicStatus('Müzik: durduruldu');
+      }
+    }
+
+    bgMusic.addEventListener('error', () => {
+      setMusicStatus('music.mp3 bulunamadı. Spotify linkini menüden açabilirsin.');
+    });
+
+    volumeSlider.addEventListener('input', () => {
+      bgMusic.volume = Number(volumeSlider.value);
+      setMusicStatus(`Müzik sesi: %${Math.round(bgMusic.volume * 100)}`);
+    });
+
+    toggleMusicBtn.addEventListener('click', toggleMusic);
+    closeSettingsBtn.addEventListener('click', closeSettings);
+
     window.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        settingsOpen ? closeSettings() : openSettings();
+        return;
+      }
+
       if (event.code === 'Space') {
         event.preventDefault();
         jump();
       }
 
-      if (event.key.toLowerCase() === 'r' && gameOver) {
-        resetGame();
-      }
+      if (event.key.toLowerCase() === 'r' && gameOver) resetGame();
     });
 
     canvas.addEventListener('pointerdown', jump);

@@ -58,3 +58,23 @@ package_for_share.bat
 ```
 
 Bu komut `flipy-bird-package.zip` dosyası üretir. Sonra bu ZIP'i Google Drive / WeTransfer / Discord vb. yere yükleyip link paylaşabilirsin.
+
+
+## ESC ile Ayarlar Menüsü
+- Oyunda `ESC` tuşuna basınca ayarlar menüsü açılır/kapanır.
+- Menüden müzik sesi ayarlanır.
+
+## Spotify müziği hakkında
+- İstediğin Spotify parçasının linki ayarlar menüsüne eklendi.
+- Spotify teknik/politika sebepleriyle bu linkten oyunun içine direkt stream vermez.
+- Oyunda müzik çalması için proje klasörüne `music.mp3` dosyası koyabilirsin (ayar menüsünden sesini kontrol edersin).
+
+## Oyunu EXE olarak açma
+1. Windows'ta proje klasöründe:
+   ```cmd
+   build_exe.bat
+   ```
+2. Oluşan dosya:
+   - `dist\FlipyBird.exe`
+
+`FlipyBird.exe` çalışınca oyunu tarayıcıda otomatik açar.
