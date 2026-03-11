@@ -1,212 +1,294 @@
 #!/usr/bin/env python3
-"""Simple Subway Surfers-style endless runner for terminal/CMD."""
+"""2D Subway Surfers-style mini game with Tkinter and 3 lives."""
 
 from __future__ import annotations
 
-import os
 import random
-import sys
-import time
+import tkinter as tk
 from dataclasses import dataclass
 
-LANES = 3
-WIDTH = 21
-HEIGHT = 18
-FRAME_TIME = 0.11
-OBSTACLE_SPAWN_RATE = 0.36
-COIN_SPAWN_RATE = 0.28
+WINDOW_W = 420
+WINDOW_H = 700
+LANES_X = [105, 210, 315]
+PLAYER_Y = 590
+GROUND_SPEED = 8
+SPAWN_MS = 650
+TICK_MS = 16
+JUMP_HEIGHT = 170
+JUMP_DURATION = 460
+START_LIVES = 3
 
 
 @dataclass
-class Runner:
-    lane: int = 1
-    jump_timer: int = 0
-
-    @property
-    def is_jumping(self) -> bool:
-        return self.jump_timer > 0
-
-
-@dataclass
-class Item:
+class Obstacle:
     lane: int
-    y: int
-    kind: str  # "obstacle" | "coin"
+    x: float
+    y: float
+    w: int = 56
+    h: int = 70
 
 
-class Keyboard:
-    """Cross-platform non-blocking key reader."""
-
-    def __init__(self) -> None:
-        self._impl = None
-        if os.name == "nt":
-            import msvcrt  # type: ignore
-
-            self._impl = ("win", msvcrt)
-        else:
-            if not sys.stdin.isatty():
-                self._impl = None
-                return
-
-            import select
-            import termios
-            import tty
-
-            self._impl = ("unix", select, termios, tty)
-            self.fd = sys.stdin.fileno()
-            self.old = termios.tcgetattr(self.fd)
-            tty.setcbreak(self.fd)
-
-    def close(self) -> None:
-        if self._impl and self._impl[0] == "unix":
-            _, _, termios, _ = self._impl
-            termios.tcsetattr(self.fd, termios.TCSADRAIN, self.old)
-
-    def get_key(self) -> str | None:
-        if not self._impl:
-            return None
-        if self._impl[0] == "win":
-            _, msvcrt = self._impl
-            if msvcrt.kbhit():
-                ch = msvcrt.getch()
-                if ch in (b"\xe0", b"\x00"):
-                    extra = msvcrt.getch()
-                    arrows = {b"K": "left", b"M": "right", b"H": "up"}
-                    return arrows.get(extra, "")
-                mapping = {b"a": "left", b"d": "right", b"w": "up", b"q": "quit", b" ": "up"}
-                return mapping.get(ch.lower(), "")
-            return None
-
-        _, select, *_ = self._impl
-        ready, _, _ = select.select([sys.stdin], [], [], 0)
-        if ready:
-            ch = sys.stdin.read(1)
-            mapping = {"a": "left", "d": "right", "w": "up", "q": "quit", " ": "up"}
-            return mapping.get(ch.lower(), "")
-        return None
+@dataclass
+class Coin:
+    lane: int
+    x: float
+    y: float
+    r: int = 14
 
 
-def clear() -> None:
-    os.system("cls" if os.name == "nt" else "clear")
+class Subway2DGame:
+    def __init__(self, root: tk.Tk) -> None:
+        self.root = root
+        self.root.title("Subway 2D Runner")
+        self.root.resizable(False, False)
 
+        self.canvas = tk.Canvas(root, width=WINDOW_W, height=WINDOW_H, bg="#111")
+        self.canvas.pack()
 
-def lane_to_x(lane: int) -> int:
-    return 2 + lane * 6
+        self.score = 0
+        self.best = 0
+        self.lives = START_LIVES
+        self.running = True
 
+        self.player_lane = 1
+        self.player_x = LANES_X[self.player_lane]
+        self.player_y = PLAYER_Y
+        self.player_w = 48
+        self.player_h = 66
 
-def draw(runner: Runner, items: list[Item], score: int, best: int) -> None:
-    canvas = [[" " for _ in range(WIDTH)] for _ in range(HEIGHT)]
+        self.is_jumping = False
+        self.jump_start_y = PLAYER_Y
+        self.jump_elapsed = 0
 
-    for y in range(HEIGHT):
-        for lane in range(LANES):
-            x = lane_to_x(lane)
-            canvas[y][x] = "|"
+        self.road_offset = 0
+        self.obstacles: list[Obstacle] = []
+        self.coins: list[Coin] = []
 
-    for item in items:
-        if 0 <= item.y < HEIGHT:
-            x = lane_to_x(item.lane)
-            canvas[item.y][x] = "X" if item.kind == "obstacle" else "$"
+        self.spawn_after_id: str | None = None
+        self.loop_after_id: str | None = None
 
-    player_y = HEIGHT - 2 if not runner.is_jumping else HEIGHT - 4
-    canvas[player_y][lane_to_x(runner.lane)] = "A" if not runner.is_jumping else "^"
+        self.root.bind("<Left>", self.move_left)
+        self.root.bind("<Right>", self.move_right)
+        self.root.bind("<a>", self.move_left)
+        self.root.bind("<d>", self.move_right)
+        self.root.bind("<space>", self.jump)
+        self.root.bind("<Up>", self.jump)
+        self.root.bind("<w>", self.jump)
+        self.root.bind("<r>", self.restart)
 
-    lines = ["Subway CMD Runner (A/D: lane, W/Space: jump, Q: quit)"]
-    lines.append(f"Score: {score}   Best: {best}")
-    lines.append("+" + "-" * WIDTH + "+")
-    for row in canvas:
-        lines.append("|" + "".join(row) + "|")
-    lines.append("+" + "-" * WIDTH + "+")
-    print("\n".join(lines))
+        self.start_round()
 
+    def start_round(self) -> None:
+        self.running = True
+        self.score = 0
+        self.lives = START_LIVES
+        self.player_lane = 1
+        self.player_x = LANES_X[self.player_lane]
+        self.player_y = PLAYER_Y
+        self.is_jumping = False
+        self.jump_elapsed = 0
+        self.obstacles.clear()
+        self.coins.clear()
 
-def update_items(items: list[Item]) -> None:
-    for item in items:
-        item.y += 1
-    items[:] = [i for i in items if i.y < HEIGHT]
+        self.schedule_spawn()
+        self.game_loop()
 
+    def restart(self, _event: tk.Event | None = None) -> None:
+        if self.running:
+            return
+        if self.spawn_after_id:
+            self.root.after_cancel(self.spawn_after_id)
+        if self.loop_after_id:
+            self.root.after_cancel(self.loop_after_id)
+        self.start_round()
 
-def spawn(items: list[Item]) -> None:
-    if random.random() < OBSTACLE_SPAWN_RATE:
-        items.append(Item(lane=random.randint(0, LANES - 1), y=0, kind="obstacle"))
-    if random.random() < COIN_SPAWN_RATE:
-        items.append(Item(lane=random.randint(0, LANES - 1), y=0, kind="coin"))
+    def move_left(self, _event: tk.Event | None = None) -> None:
+        if not self.running:
+            return
+        self.player_lane = max(0, self.player_lane - 1)
+        self.player_x = LANES_X[self.player_lane]
 
+    def move_right(self, _event: tk.Event | None = None) -> None:
+        if not self.running:
+            return
+        self.player_lane = min(2, self.player_lane + 1)
+        self.player_x = LANES_X[self.player_lane]
 
-def collisions(runner: Runner, items: list[Item]) -> tuple[bool, int]:
-    gain = 0
-    danger_y = HEIGHT - 2
-    kept: list[Item] = []
+    def jump(self, _event: tk.Event | None = None) -> None:
+        if not self.running or self.is_jumping:
+            return
+        self.is_jumping = True
+        self.jump_elapsed = 0
 
-    for item in items:
-        if item.lane == runner.lane and item.y == danger_y:
-            if item.kind == "coin":
-                gain += 25
+    def schedule_spawn(self) -> None:
+        if not self.running:
+            return
+
+        lane = random.randint(0, 2)
+        if random.random() < 0.72:
+            self.obstacles.append(Obstacle(lane=lane, x=LANES_X[lane], y=-80))
+        if random.random() < 0.45:
+            coin_lane = random.randint(0, 2)
+            self.coins.append(Coin(lane=coin_lane, x=LANES_X[coin_lane], y=-40))
+
+        self.spawn_after_id = self.root.after(SPAWN_MS, self.schedule_spawn)
+
+    def update_jump(self) -> None:
+        if not self.is_jumping:
+            self.player_y = PLAYER_Y
+            return
+
+        self.jump_elapsed += TICK_MS
+        t = self.jump_elapsed / JUMP_DURATION
+
+        if t >= 1:
+            self.is_jumping = False
+            self.player_y = PLAYER_Y
+            return
+
+        # Parabolic jump arc
+        arc = 4 * t * (1 - t)
+        self.player_y = PLAYER_Y - int(JUMP_HEIGHT * arc)
+
+    def player_rect(self) -> tuple[float, float, float, float]:
+        left = self.player_x - self.player_w / 2
+        right = self.player_x + self.player_w / 2
+        top = self.player_y - self.player_h / 2
+        bottom = self.player_y + self.player_h / 2
+        return left, top, right, bottom
+
+    @staticmethod
+    def intersects(a: tuple[float, float, float, float], b: tuple[float, float, float, float]) -> bool:
+        return not (a[2] < b[0] or a[0] > b[2] or a[3] < b[1] or a[1] > b[3])
+
+    def handle_collisions(self) -> None:
+        p = self.player_rect()
+
+        remaining_obstacles: list[Obstacle] = []
+        took_hit = False
+
+        for ob in self.obstacles:
+            ob_rect = (
+                ob.x - ob.w / 2,
+                ob.y - ob.h / 2,
+                ob.x + ob.w / 2,
+                ob.y + ob.h / 2,
+            )
+            if self.intersects(p, ob_rect):
+                if not took_hit:
+                    self.lives -= 1
+                    took_hit = True
                 continue
-            if not runner.is_jumping:
-                return True, gain
-        kept.append(item)
+            remaining_obstacles.append(ob)
 
-    items[:] = kept
-    return False, gain
+        self.obstacles = remaining_obstacles
 
+        remaining_coins: list[Coin] = []
+        for coin in self.coins:
+            c_rect = (coin.x - coin.r, coin.y - coin.r, coin.x + coin.r, coin.y + coin.r)
+            if self.intersects(p, c_rect):
+                self.score += 50
+                continue
+            remaining_coins.append(coin)
 
-def play(best_score: int) -> int:
-    runner = Runner()
-    items: list[Item] = []
-    score = 0
-    keyboard = Keyboard()
+        self.coins = remaining_coins
 
-    try:
-        while True:
-            key = keyboard.get_key()
-            if key == "left":
-                runner.lane = max(0, runner.lane - 1)
-            elif key == "right":
-                runner.lane = min(LANES - 1, runner.lane + 1)
-            elif key == "up" and not runner.is_jumping:
-                runner.jump_timer = 2
-            elif key == "quit":
-                return best_score
+        if self.lives <= 0:
+            self.running = False
+            self.best = max(self.best, self.score)
 
-            update_items(items)
-            spawn(items)
+    def update_world(self) -> None:
+        self.road_offset = (self.road_offset + GROUND_SPEED) % 60
 
-            dead, gain = collisions(runner, items)
-            if dead:
-                clear()
-                draw(runner, items, score, max(best_score, score))
-                print("\nGAME OVER! Devam etmek için Enter, çıkmak için Q.")
-                choice = input().strip().lower()
-                if choice == "q":
-                    return max(best_score, score)
-                return max(best_score, score)
+        for ob in self.obstacles:
+            ob.y += GROUND_SPEED
+        for coin in self.coins:
+            coin.y += GROUND_SPEED
 
-            if runner.jump_timer > 0:
-                runner.jump_timer -= 1
+        self.obstacles = [ob for ob in self.obstacles if ob.y < WINDOW_H + 100]
+        self.coins = [coin for coin in self.coins if coin.y < WINDOW_H + 40]
 
-            score += 10 + gain
-            best_score = max(best_score, score)
+        self.score += 2
+        self.best = max(self.best, self.score)
 
-            clear()
-            draw(runner, items, score, best_score)
-            time.sleep(FRAME_TIME)
-    finally:
-        keyboard.close()
+    def draw(self) -> None:
+        c = self.canvas
+        c.delete("all")
+
+        # Road
+        c.create_rectangle(35, 0, WINDOW_W - 35, WINDOW_H, fill="#1d1d1d", outline="")
+        c.create_line(35, 0, 35, WINDOW_H, fill="#666", width=3)
+        c.create_line(WINDOW_W - 35, 0, WINDOW_W - 35, WINDOW_H, fill="#666", width=3)
+
+        # Lane separators with scrolling effect
+        for x in [157, 262]:
+            y = -60 + self.road_offset
+            while y < WINDOW_H + 60:
+                c.create_line(x, y, x, y + 36, fill="#bbb", width=4)
+                y += 60
+
+        # Obstacles
+        for ob in self.obstacles:
+            c.create_rectangle(
+                ob.x - ob.w / 2,
+                ob.y - ob.h / 2,
+                ob.x + ob.w / 2,
+                ob.y + ob.h / 2,
+                fill="#d63a3a",
+                outline="#7b1d1d",
+                width=3,
+            )
+
+        # Coins
+        for coin in self.coins:
+            c.create_oval(
+                coin.x - coin.r,
+                coin.y - coin.r,
+                coin.x + coin.r,
+                coin.y + coin.r,
+                fill="#ffd447",
+                outline="#9f7f18",
+                width=2,
+            )
+
+        # Player
+        c.create_rectangle(
+            self.player_x - self.player_w / 2,
+            self.player_y - self.player_h / 2,
+            self.player_x + self.player_w / 2,
+            self.player_y + self.player_h / 2,
+            fill="#49a8ff",
+            outline="#1f5f99",
+            width=3,
+        )
+
+        # HUD
+        c.create_text(12, 16, text=f"Score: {self.score}", anchor="w", fill="white", font=("Arial", 14, "bold"))
+        c.create_text(12, 40, text=f"Best: {self.best}", anchor="w", fill="#ddd", font=("Arial", 12))
+        c.create_text(WINDOW_W - 12, 16, text=f"Can: {self.lives}", anchor="e", fill="#ff7f7f", font=("Arial", 14, "bold"))
+        c.create_text(WINDOW_W / 2, 16, text="A/D veya ←/→ | W/Space zıpla", anchor="n", fill="#cfcfcf", font=("Arial", 10))
+
+        if not self.running:
+            c.create_rectangle(70, 250, WINDOW_W - 70, 430, fill="#000", outline="#888", width=2)
+            c.create_text(WINDOW_W / 2, 295, text="OYUN BİTTİ", fill="white", font=("Arial", 24, "bold"))
+            c.create_text(WINDOW_W / 2, 336, text=f"Skor: {self.score}", fill="#ddd", font=("Arial", 16))
+            c.create_text(WINDOW_W / 2, 365, text=f"En iyi: {self.best}", fill="#ddd", font=("Arial", 14))
+            c.create_text(WINDOW_W / 2, 402, text="Tekrar başlamak için R", fill="#8ecbff", font=("Arial", 14, "bold"))
+
+    def game_loop(self) -> None:
+        if self.running:
+            self.update_jump()
+            self.update_world()
+            self.handle_collisions()
+
+        self.draw()
+        self.loop_after_id = self.root.after(TICK_MS, self.game_loop)
 
 
 def main() -> None:
-    random.seed()
-
-    if not sys.stdin.isatty():
-        print("Bu oyun interaktif terminal/CMD gerektirir.")
-        return
-
-    best = 0
-    while True:
-        best = play(best)
-        print("\nTekrar oynamak için Enter, tamamen çıkmak için Q.")
-        if input().strip().lower() == "q":
-            break
+    root = tk.Tk()
+    Subway2DGame(root)
+    root.mainloop()
 
 
 if __name__ == "__main__":
