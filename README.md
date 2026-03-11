@@ -1,13 +1,14 @@
-# Subway 2D Runner
+# Subway 3D Runner
 
-Bu proje, **Subway Surfers benzeri 2D bir koşu oyunu** sunar.
+Bu proje, **Subway Surfers benzeri pseudo-3D (perspektif) bir koşu oyunu** sunar.
 
 ## Özellikler
 
-- 3 şeritli 2D yol sistemi
+- 3 şeritli perspektif (3D hissi veren) yol
 - Engel ve coin toplama mekaniği
 - Zıplama hareketi
-- **3 can hakkı** (engel çarpışmalarında can azalır)
+- **3 can hakkı**
+- Can azalınca **çarpma animasyonu** (ekran flash + kısa shake)
 - Skor ve en iyi skor takibi
 
 ## Hızlı Çalıştırma (Windows)
