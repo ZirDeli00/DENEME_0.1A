@@ -143,7 +143,7 @@
     <header>
       <div>
         <div class="title">Hakan ÇELİK - Yapay Zeka Sohbet</div>
-        <div class="subtitle">Kendi karar veren beyin + gerektiğinde internetten cevap</div>
+        <div class="subtitle">Yerel beyin: insan gibi düşünme, karar verme ve konuşma</div>
       </div>
       <div class="status-dot" title="Çevrimiçi"></div>
     </header>
@@ -152,15 +152,15 @@
       <div class="toolbar-left">
         <button type="button" class="tool-btn" id="uploadBtn">📎 Dosya / Fotoğraf Ekle</button>
       </div>
-      <small style="color:var(--muted)">Soruyu önce kendi analiz eder, gerekirse internetten bulup burada gösterir.</small>
+      <small style="color:var(--muted)">İnternet kapalı; tüm yanıtlar yerel karar mekanizmasıyla üretilir.</small>
     </div>
 
     <div class="quick-actions" id="quickActions">
       <button type="button" class="chip">Benim adım Ahmet</button>
-      <button type="button" class="chip">Saat kaç?</button>
-      <button type="button" class="chip">Yapay zeka nedir?</button>
+      <button type="button" class="chip">Bugün nasıl plan yapayım?</button>
+      <button type="button" class="chip">Kafam çok karışık</button>
       <button type="button" class="chip">2+5*3 hesapla</button>
-      <button type="button" class="chip">Ay yüzey sıcaklığı kaç derece?</button>
+      <button type="button" class="chip">Kısa bir motivasyon ver</button>
     </div>
 
     <div id="chat"></div>
@@ -172,7 +172,7 @@
       <button class="send-btn" type="submit">Gönder</button>
       <input id="fileInput" type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xlsx" hidden />
     </form>
-    <div class="hint">Hakan ÇELİK artık sizi başka sekmeye göndermeden web bilgisini sohbet içinde gösterir.</div>
+    <div class="hint">Hakan ÇELİK önce sorunun amacını anlar, sonra empatik ve adım adım yanıt verir.</div>
   </div>
 
   <script>
@@ -188,23 +188,34 @@
     let pendingFiles = [];
 
     const Brain = {
-      memory: { userName: null, lastTopic: null, lastQuestion: null, lastAnswerSource: 'local' },
-      knowledge: {
-        javascript: 'JavaScript, web uygulamalarının etkileşimli davranışlarını yöneten bir programlama dilidir.',
-        python: 'Python, okunabilirliği yüksek ve yapay zeka dahil birçok alanda kullanılan güçlü bir dildir.',
-        yapayzeka: 'Yapay zeka, verilerden öğrenip karar verme veya tahmin üretme yeteneği olan sistemleri ifade eder.',
-        turkiye: 'Türkiye; Avrupa ve Asya arasında köprü konumunda, zengin kültürel mirasa sahip bir ülkedir.'
+      memory: {
+        userName: null,
+        mood: null,
+        goal: null,
+        lastTopic: null,
+        lastQuestion: null
       },
-      answerPools: {
-        motivation: [
-          'Küçük bir adım bile ilerlemedir. Bugün sadece başlayın, gerisi gelir.',
-          'Mükemmel olmak zorunda değilsiniz; tutarlı olmak yeterli.',
-          'Disiplin, motivasyonun gelmediği günlerde bile sizi hedefe taşır.'
+      knowledge: {
+        javascript: 'JavaScript, web uygulamalarının etkileşimli davranışlarını yöneten programlama dilidir.',
+        python: 'Python, okunabilirliği güçlü olan ve veri bilimi/yapay zeka dahil birçok alanda kullanılan dildir.',
+        yapayzeka: 'Yapay zeka, veriden öğrenen ve karar verme süreçlerini otomatikleştiren sistemler bütünüdür.',
+        turkiye: 'Türkiye; Avrupa ve Asya arasında köprü konumunda, genç nüfusu ve güçlü kültürel birikimi olan bir ülkedir.'
+      },
+      templates: {
+        empathy: [
+          'Sizi anlıyorum, bu durum gerçekten yorucu olabilir.',
+          'Bu his çok normal, yalnız değilsiniz.',
+          'Bunu paylaşmanız çok iyi olmuş, birlikte netleştirebiliriz.'
         ],
         fallback: [
-          'Bunu daha net yanıtlamak için biraz daha detay verebilir misiniz?',
-          'Soruyu anladım, isterseniz bir örnekle açabiliriz.',
-          'Bu konuda iki farklı açıdan yardımcı olabilirim: kısa özet veya detaylı anlatım.'
+          'Bunu daha iyi anlamam için hedefinizi bir cümleyle yazar mısınız?',
+          'İsterseniz bu konuyu adım adım çözelim: önce sorun, sonra seçenekler, sonra karar.',
+          'Güzel bir konu açtınız. Sizin için kısa cevap mı detaylı plan mı hazırlayayım?'
+        ],
+        motivation: [
+          'Küçük ama net bir adım seçin; büyük ilerleme böyle başlar.',
+          'Mükemmel olmaya değil, devam etmeye odaklanın.',
+          'Bugün sadece %1 daha iyi olmanız yeterli.'
         ]
       }
     };
@@ -278,41 +289,9 @@
       }
     }
 
-    async function fetchWebSummary(query) {
-      const wikiUrl = `https://tr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
-      try {
-        const response = await fetch(wikiUrl, { headers: { accept: 'application/json' } });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.extract) {
-            return { source: 'Vikipedi', text: data.extract, link: data.content_urls?.desktop?.page || wikiUrl };
-          }
-        }
-      } catch {}
-
-      try {
-        const ddgUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_redirect=1&no_html=1`;
-        const response = await fetch(ddgUrl);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.AbstractText) {
-            return { source: 'DuckDuckGo', text: data.AbstractText, link: data.AbstractURL || `https://duckduckgo.com/?q=${encodeURIComponent(query)}` };
-          }
-        }
-      } catch {}
-
-      return null;
-    }
-
-    function analyzeNeedForWeb(normalized, intent, localAnswerExists) {
-      const webSignals = /(son durum|guncel|haber|bugun|fiyat|hava durumu|kim kazandi|mac sonucu|nedir|kimdir|nerede|kac)/.test(normalized);
-      const unknownTopic = /(mars|uzay|ulkeler|tarihce|bilim|teknoloji|saglik|ekonomi)/.test(normalized) && !localAnswerExists;
-      return intent === 'web_search' || (!localAnswerExists && (webSignals || unknownTopic));
-    }
-
     function detectIntent(normalized, rawText) {
       if (/^(selam|merhaba|hey|iyi gunler)/.test(normalized)) return 'greet';
-      if (/(nasilsin|naber|iyi misin)/.test(normalized)) return 'mood';
+      if (/(nasilsin|naber|iyi misin)/.test(normalized)) return 'mood_check';
       if (/(saat kac|suan saat|kacta)/.test(normalized)) return 'time';
       if (/(bugun tarih|tarih ne|hangi gun)/.test(normalized)) return 'date';
       if (/(yardim|neler yapabilirsin|ne yapabilirsin)/.test(normalized)) return 'help';
@@ -322,11 +301,45 @@
       if (parseUserName(rawText)) return 'set_name';
       if (/(hesapla|kac eder|\d+\s*[+\-*/])/.test(normalized)) return 'calculate';
       if (/(javascript|python|yapay zeka|turkiye)/.test(normalized)) return 'knowledge';
-      if (/(arastir|ara|search|googlela)/.test(normalized)) return 'web_search';
+      if (/(plan|program|duzen|hedef|calisma plani)/.test(normalized)) return 'planning';
+      if (/(kararsiz|kararsizim|secemiyorum|kafa karisik|ne yapacagimi bilmiyorum)/.test(normalized)) return 'decision_support';
+      if (/(uzgun|stres|kayg|bunaldim|yorgun|kotu hissediyorum)/.test(normalized)) return 'emotional_support';
       return 'fallback';
     }
 
-    async function think(rawText) {
+    function composePlanReply(rawText) {
+      Brain.memory.goal = rawText;
+      return [
+        'Tamam, bunu birlikte planlayalım. Sana 3 adımlı net bir plan öneriyorum:',
+        '1) Hedefi netleştir: Bu konuyu neden yapmak istediğini 1 cümle ile yaz.',
+        '2) İlk küçük adım: 20-30 dakikada tamamlanacak bir görev seç.',
+        '3) Takip: Bugün bitince bana "tamamlandı" yaz, bir sonraki adımı birlikte belirleyelim.'
+      ].join('\n');
+    }
+
+    function composeDecisionReply() {
+      return [
+        `${randomFrom(Brain.templates.empathy)}`,
+        'Karar vermek için şu mini yöntemi deneyelim:',
+        '• Seçenekleri yaz (A/B/C)',
+        '• Her seçenek için + / - / risk notu ver',
+        '• En çok değerine uyan seçeneği 24 saat test et',
+        'İstersen seçeneklerini yaz, birlikte puanlayayım.'
+      ].join('\n');
+    }
+
+    function composeEmotionalReply() {
+      Brain.memory.mood = 'zorlanıyor';
+      return [
+        `${randomFrom(Brain.templates.empathy)}`,
+        'Hemen uygulanabilir kısa bir rahatlama rutini:',
+        '1) 4 saniye nefes al, 4 saniye tut, 6 saniye ver (5 tur)',
+        '2) Şu an kontrol edebildiğin 1 küçük işi seç',
+        '3) O işi 10 dakika yap ve bana sonucu yaz'
+      ].join('\n');
+    }
+
+    function think(rawText) {
       const normalized = normalizeText(rawText);
       const intent = detectIntent(normalized, rawText);
       Brain.memory.lastQuestion = rawText;
@@ -334,67 +347,49 @@
       if (intent === 'set_name') {
         const found = parseUserName(rawText);
         Brain.memory.userName = found;
-        Brain.memory.lastAnswerSource = 'local';
-        return `Memnun oldum ${found}! Adınızı hafızama kaydettim.`;
+        return `Memnun oldum ${found}! Seni hatırlayacağım.`;
       }
 
       if (intent === 'recall_name') {
-        Brain.memory.lastAnswerSource = 'local';
         return Brain.memory.userName
-          ? `Evet, adınızı hatırlıyorum: ${Brain.memory.userName}.`
-          : 'Henüz adınızı söylemediniz. "Benim adım ..." yazabilirsiniz.';
+          ? `Evet, adını hatırlıyorum: ${Brain.memory.userName}.`
+          : 'Henüz adını söylemedin. "Benim adım ..." yazabilirsin.';
       }
 
-      if (intent === 'greet') return `Merhaba${Brain.memory.userName ? ' ' + Brain.memory.userName : ''}! Ben Hakan ÇELİK.`;
-      if (intent === 'mood') return 'İyiyim, teşekkür ederim! Sorunuza odaklanıp en uygun cevabı bulurum.';
+      if (intent === 'greet') return `Merhaba${Brain.memory.userName ? ' ' + Brain.memory.userName : ''}! Ben Hakan ÇELİK, konuşarak birlikte düşünebiliriz.`;
+      if (intent === 'mood_check') return 'İyiyim, teşekkür ederim. Senin için bugün en önemli konu neyse oradan başlayalım.';
       if (intent === 'time') return `Şu an saat ${new Date().toLocaleTimeString('tr-TR')}.`;
       if (intent === 'date') return `Bugünün tarihi: ${new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}.`;
 
       if (intent === 'help') {
-        return 'Yapabildiklerim:\n• Soruyu analiz edip internet gerekip gerekmediğine kendim karar veririm\n• Gerekirse internetten bulduğum cevabı burada gösteririm\n• Adınızı hatırlarım, saat/tarih söylerim, hesaplama yaparım\n• Dosya/fotoğraf yüklemeyi desteklerim';
+        return 'Yapabildiklerim:\n• Soruyu anlayıp uygun konuşma tarzı seçerim\n• Plan çıkarırım, karar vermene yardım ederim\n• Duygusal destek ve motivasyon verebilirim\n• Temel bilgi, hesaplama, saat/tarih\n• Dosya/fotoğraf eklerini gösteririm\n\nNot: Bu sürümde internet kullanılmıyor; tamamen yerel çalışıyorum.';
       }
 
-      if (intent === 'motivation') return randomFrom(Brain.answerPools.motivation);
-      if (intent === 'joke') return 'Robotlara neden kahve verilmez? Zaten Java ile çalışıyorlar. 😄';
+      if (intent === 'motivation') return randomFrom(Brain.templates.motivation);
+      if (intent === 'joke') return 'Robotlar neden tartışmaz? Çünkü gereksiz döngüye girmek istemezler. 😄';
+      if (intent === 'planning') return composePlanReply(rawText);
+      if (intent === 'decision_support') return composeDecisionReply();
+      if (intent === 'emotional_support') return composeEmotionalReply();
 
       if (intent === 'calculate') {
         const calc = calculateExpression(normalized);
         return calc ?? 'İşlem göremedim. Örn: (12+8)/2 kaç eder?';
       }
 
-      let localAnswer = null;
       if (intent === 'knowledge') {
         for (const key of Object.keys(Brain.knowledge)) {
           if (normalized.includes(key)) {
             Brain.memory.lastTopic = key;
-            localAnswer = Brain.knowledge[key];
-            break;
+            return `${Brain.knowledge[key]}\nİstersen bunu basit örneklerle de anlatabilirim.`;
           }
         }
       }
 
-      if (!localAnswer && /daha fazla|detay|ac/.test(normalized) && Brain.memory.lastTopic) {
-        localAnswer = `${Brain.knowledge[Brain.memory.lastTopic]}\nİsterseniz güncel bilgi için ayrıca internetten de tarayabilirim.`;
+      if ((/daha fazla|detay|ac/.test(normalized)) && Brain.memory.lastTopic) {
+        return `${Brain.knowledge[Brain.memory.lastTopic]}\nEk olarak bunu günlük hayattan bir örnekle de açıklayabilirim.`;
       }
 
-      const shouldUseWeb = analyzeNeedForWeb(normalized, intent, Boolean(localAnswer));
-      if (shouldUseWeb) {
-        const cleanedQuery = rawText.replace(/^(ara[şs]t[ıi]r|ara|search|googlela)\s*:?/i, '').trim() || rawText;
-        const web = await fetchWebSummary(cleanedQuery);
-        Brain.memory.lastAnswerSource = 'web';
-        if (web) {
-          return `Sorunuzu analiz ettim ve internetten araştırma gerektiğine karar verdim.\n\nKaynak: ${web.source}\nCevap: ${web.text}\nKaynak bağlantısı: ${web.link}`;
-        }
-        return 'Sorunuz için internette arama denedim ancak kısa özet çekemedim. İnternet bağlantınızı kontrol edip tekrar deneyebiliriz.';
-      }
-
-      if (localAnswer) {
-        Brain.memory.lastAnswerSource = 'local';
-        return localAnswer;
-      }
-
-      Brain.memory.lastAnswerSource = 'local';
-      return randomFrom(Brain.answerPools.fallback);
+      return randomFrom(Brain.templates.fallback);
     }
 
     async function sendMessage(text) {
@@ -404,7 +399,8 @@
       fileInput.value = '';
 
       typing.style.display = 'block';
-      const response = await think(text);
+      await new Promise((resolve) => setTimeout(resolve, 320 + Math.floor(Math.random() * 320)));
+      const response = think(text);
       typing.style.display = 'none';
       addMessage(response, 'bot');
     }
@@ -416,7 +412,7 @@
       addMessage(`Yüklenecek dosyalar hazır:\n${names}`, 'bot');
     }
 
-    addMessage('Merhaba! Ben Hakan ÇELİK. Sorunuza göre internet araması gerekip gerekmediğine kendim karar veririm ve sonucu burada gösteririm.', 'bot');
+    addMessage('Merhaba! Ben Hakan ÇELİK. Bu sürümde internet olmadan, tamamen yerel bir beyin gibi seninle konuşuyorum.', 'bot');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
