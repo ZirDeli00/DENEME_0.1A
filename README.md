@@ -1,20 +1,18 @@
 # Hakan ÇELİK Yapay Zeka Sohbet
 
-Bu proje, tek bir HTML dosyasıyla çalışan ve gelişmiş yerel sohbet + internet destekli araştırma yetenekleri sunan bir arayüz içerir.
+Bu proje, tek bir HTML dosyasıyla çalışan ve yerel "beyin" + internet destekli araştırma yetenekleri sunan bir sohbet arayüzüdür.
 
 ## Dosyalar
-- `Hakan_CELIK_Chat.html`: Modern sohbet arayüzü + gelişmiş yerel anlama/yanıt motoru + web araştırma + dosya/fotoğraf ekleme.
+- `Hakan_CELIK_Chat.html`: Modern sohbet arayüzü + karar veren yerel beyin + web araştırma + dosya/fotoğraf ekleme.
 - `launcher.py`: HTML dosyasını varsayılan tarayıcıda açar.
 - `build_exe.bat`: Windows'ta `launcher.py` dosyasından `HakanCELIKChat.exe` üretir.
 
 ## Öne Çıkan Özellikler
-- Türkçe odaklı mesaj anlama (selamlama, yardım, saat, tarih, motivasyon vb.)
-- Kullanıcı adını hatırlama
-- Basit matematik işlemleri çözme
-- İnternetten kısa bilgi özeti çekme (Wikipedia / DuckDuckGo denemesi)
-- Gerektiğinde arama motorunu otomatik açma
-- Dosya ve fotoğraf yükleme, mesaja ekli gösterme
-- Modern ve okunabilir sohbet arayüzü
+- Sorunun tipini analiz eden yerel "beyin" (intent + ihtiyaç analizi)
+- İnternet araması gerekip gerekmediğine otomatik karar verme
+- İnternetten bulunan cevabı yeni sekme açmadan sohbet ekranında gösterme
+- Kullanıcı adı hafızası, saat/tarih, temel matematik
+- Dosya ve fotoğraf yükleme, mesaja ekli gösterim
 
 ## HTML ile açma
 Windows'ta `Hakan_CELIK_Chat.html` dosyasına çift tıklayın.

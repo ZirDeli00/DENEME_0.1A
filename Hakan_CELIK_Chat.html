@@ -16,9 +16,8 @@
       --accent: #22d3ee;
       --accent-2: #a78bfa;
       --user: linear-gradient(135deg, #22d3ee, #38bdf8);
-      --bot: rgba(15, 23, 42, 0.85);
+      --bot: rgba(15, 23, 42, 0.88);
     }
-
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -33,7 +32,6 @@
         var(--bg);
       padding: 20px;
     }
-
     .app {
       width: min(980px, 100%);
       height: min(780px, calc(100vh - 40px));
@@ -46,7 +44,6 @@
       grid-template-rows: auto auto 1fr auto auto;
       overflow: hidden;
     }
-
     header {
       padding: 16px 20px;
       border-bottom: 1px solid var(--border);
@@ -55,22 +52,21 @@
       justify-content: space-between;
       background: linear-gradient(90deg, rgba(34, 211, 238, 0.12), rgba(167, 139, 250, 0.12));
     }
-
     .title { font-size: 1.1rem; font-weight: 700; }
     .subtitle { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
     .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 12px #4ade80; }
 
-    .quick-actions, .toolbar {
+    .toolbar, .quick-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       padding: 10px 14px;
       border-bottom: 1px solid var(--border);
       background: var(--panel-soft);
+      align-items: center;
+      justify-content: space-between;
     }
-
-    .toolbar { justify-content: space-between; align-items: center; }
-
+    .toolbar-left { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .chip, .tool-btn {
       border: 1px solid rgba(56, 189, 248, 0.35);
       background: rgba(30, 41, 59, 0.8);
@@ -80,7 +76,6 @@
       font-size: 0.82rem;
       cursor: pointer;
     }
-
     .tool-btn { border-radius: 10px; }
     .chip:hover, .tool-btn:hover { border-color: rgba(34, 211, 238, 0.9); color: #fff; }
 
@@ -92,17 +87,15 @@
       font-size: 0.75rem; font-weight: 700; border: 1px solid var(--border); background: rgba(2, 6, 23, 0.7);
       color: #bfdbfe; flex-shrink: 0;
     }
-
     .msg {
       padding: 11px 13px; border-radius: 14px; white-space: pre-wrap; line-height: 1.42;
       border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(2, 6, 23, 0.3);
     }
-
     .bot { background: var(--bot); }
     .user { background: var(--user); color: #062135; border: none; font-weight: 600; }
     .typing { color: var(--muted); font-size: 0.85rem; font-style: italic; margin-left: 40px; display: none; }
 
-    .attachment-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .attachment-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
     .attachment-item {
       border: 1px solid rgba(148, 163, 184, 0.45);
       background: rgba(2, 6, 23, 0.35);
@@ -112,13 +105,8 @@
       max-width: 220px;
       overflow-wrap: anywhere;
     }
-
     .attachment-item img {
-      width: 100%;
-      max-height: 120px;
-      object-fit: cover;
-      border-radius: 6px;
-      margin-bottom: 6px;
+      width: 100%; max-height: 120px; object-fit: cover; border-radius: 6px; margin-bottom: 6px;
     }
 
     form {
@@ -130,23 +118,17 @@
       background: var(--panel-soft);
       align-items: center;
     }
-
     input[type="text"] {
       width: 100%; font-size: 1rem; padding: 12px; border-radius: 10px;
       border: 1px solid rgba(148, 163, 184, 0.4); background: rgba(15, 23, 42, 0.88); color: var(--text); outline: none;
     }
-
     input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.16); }
-
     .send-btn {
       border: none; border-radius: 10px; padding: 12px 16px;
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
       color: #03142e; font-weight: 700; cursor: pointer;
     }
-
     .hint { font-size: 0.78rem; color: var(--muted); padding: 0 15px 14px; }
-    .toggle { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.82rem; }
-    .toggle input { accent-color: var(--accent); }
 
     @media (max-width: 700px) {
       .app { height: calc(100vh - 20px); }
@@ -161,17 +143,16 @@
     <header>
       <div>
         <div class="title">Hakan ÇELİK - Yapay Zeka Sohbet</div>
-        <div class="subtitle">Gelişmiş anlama + internet arama destekli asistan</div>
+        <div class="subtitle">Kendi karar veren beyin + gerektiğinde internetten cevap</div>
       </div>
       <div class="status-dot" title="Çevrimiçi"></div>
     </header>
 
     <div class="toolbar">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <div class="toolbar-left">
         <button type="button" class="tool-btn" id="uploadBtn">📎 Dosya / Fotoğraf Ekle</button>
-        <label class="toggle"><input type="checkbox" id="webMode" checked /> İnternet araması açık</label>
       </div>
-      <small style="color:var(--muted)">Bilgi yetersizse otomatik web özeti çıkarır.</small>
+      <small style="color:var(--muted)">Soruyu önce kendi analiz eder, gerekirse internetten bulup burada gösterir.</small>
     </div>
 
     <div class="quick-actions" id="quickActions">
@@ -179,7 +160,7 @@
       <button type="button" class="chip">Saat kaç?</button>
       <button type="button" class="chip">Yapay zeka nedir?</button>
       <button type="button" class="chip">2+5*3 hesapla</button>
-      <button type="button" class="chip">Mars hakkında araştır</button>
+      <button type="button" class="chip">Ay yüzey sıcaklığı kaç derece?</button>
     </div>
 
     <div id="chat"></div>
@@ -191,7 +172,7 @@
       <button class="send-btn" type="submit">Gönder</button>
       <input id="fileInput" type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xlsx" hidden />
     </form>
-    <div class="hint">İpucu: "Araştır: ..." yazarsanız internetten özet + arama bağlantısı üretir. Dosya/fotoğraf yüklemeyi mesaja ekleyebilirsiniz.</div>
+    <div class="hint">Hakan ÇELİK artık sizi başka sekmeye göndermeden web bilgisini sohbet içinde gösterir.</div>
   </div>
 
   <script>
@@ -200,32 +181,32 @@
     const promptInput = document.getElementById('prompt');
     const typing = document.getElementById('typing');
     const quickActions = document.getElementById('quickActions');
-    const webMode = document.getElementById('webMode');
     const uploadBtn = document.getElementById('uploadBtn');
     const uploadBtn2 = document.getElementById('uploadBtn2');
     const fileInput = document.getElementById('fileInput');
 
-    const memory = { userName: null, lastTopic: null, lastQuestion: null };
     let pendingFiles = [];
 
-    const knowledge = {
-      javascript: 'JavaScript, web uygulamalarının etkileşimli davranışlarını yöneten bir programlama dilidir.',
-      python: 'Python, okunabilirliği yüksek ve yapay zeka dahil birçok alanda kullanılan güçlü bir dildir.',
-      yapayzeka: 'Yapay zeka, verilerden öğrenip karar verme veya tahmin üretme yeteneği olan sistemleri ifade eder.',
-      turkiye: 'Türkiye; Avrupa ve Asya arasında köprü konumunda, zengin kültürel mirasa sahip bir ülkedir.'
-    };
-
-    const answerPools = {
-      motivation: [
-        'Küçük bir adım bile ilerlemedir. Bugün sadece başlayın, gerisi gelir.',
-        'Mükemmel olmak zorunda değilsiniz; tutarlı olmak yeterli.',
-        'Disiplin, motivasyonun gelmediği günlerde bile sizi hedefe taşır.'
-      ],
-      fallback: [
-        'Bu soruyu daha iyi cevaplamak için internet araması yapabilirim. "Araştır: ..." yazar mısınız?',
-        'Anladım. İsterseniz bu konuda web araştırması başlatabilirim.',
-        'Detaylı bilgi için internet araması yapayım mı?'
-      ]
+    const Brain = {
+      memory: { userName: null, lastTopic: null, lastQuestion: null, lastAnswerSource: 'local' },
+      knowledge: {
+        javascript: 'JavaScript, web uygulamalarının etkileşimli davranışlarını yöneten bir programlama dilidir.',
+        python: 'Python, okunabilirliği yüksek ve yapay zeka dahil birçok alanda kullanılan güçlü bir dildir.',
+        yapayzeka: 'Yapay zeka, verilerden öğrenip karar verme veya tahmin üretme yeteneği olan sistemleri ifade eder.',
+        turkiye: 'Türkiye; Avrupa ve Asya arasında köprü konumunda, zengin kültürel mirasa sahip bir ülkedir.'
+      },
+      answerPools: {
+        motivation: [
+          'Küçük bir adım bile ilerlemedir. Bugün sadece başlayın, gerisi gelir.',
+          'Mükemmel olmak zorunda değilsiniz; tutarlı olmak yeterli.',
+          'Disiplin, motivasyonun gelmediği günlerde bile sizi hedefe taşır.'
+        ],
+        fallback: [
+          'Bunu daha net yanıtlamak için biraz daha detay verebilir misiniz?',
+          'Soruyu anladım, isterseniz bir örnekle açabiliriz.',
+          'Bu konuda iki farklı açıdan yardımcı olabilirim: kısa özet veya detaylı anlatım.'
+        ]
+      }
     };
 
     function normalizeText(text) {
@@ -270,7 +251,6 @@
           item.appendChild(info);
           list.appendChild(item);
         });
-        bubble.appendChild(document.createElement('br'));
         bubble.appendChild(list);
       }
 
@@ -294,41 +274,43 @@
         if (!Number.isFinite(result)) return 'Bu işlemde geçerli bir sonuç çıkmadı.';
         return `Sonuç: ${result}`;
       } catch {
-        return 'İşlemi çözerken bir hata oldu. Örnek: 12/(3+1) şeklinde yazabilirsiniz.';
+        return 'İşlemi çözerken hata oldu. Örn: 12/(3+1) yazabilirsiniz.';
       }
     }
 
-    function needsWebSearch(normalized) {
-      return /^(arastir|ara|search|googlela|internetten)|\b(nedir|kimdir|haber|son durum|karsilastir|detayli anlat)\b/.test(normalized);
-    }
-
-    async function getWebSummary(query) {
+    async function fetchWebSummary(query) {
       const wikiUrl = `https://tr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
       try {
         const response = await fetch(wikiUrl, { headers: { accept: 'application/json' } });
         if (response.ok) {
           const data = await response.json();
-          if (data.extract) return { source: 'Vikipedi', text: data.extract };
+          if (data.extract) {
+            return { source: 'Vikipedi', text: data.extract, link: data.content_urls?.desktop?.page || wikiUrl };
+          }
         }
-      } catch {
-        // sessiz fallback
-      }
+      } catch {}
 
       try {
         const ddgUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_redirect=1&no_html=1`;
         const response = await fetch(ddgUrl);
         if (response.ok) {
           const data = await response.json();
-          if (data.AbstractText) return { source: 'DuckDuckGo', text: data.AbstractText };
+          if (data.AbstractText) {
+            return { source: 'DuckDuckGo', text: data.AbstractText, link: data.AbstractURL || `https://duckduckgo.com/?q=${encodeURIComponent(query)}` };
+          }
         }
-      } catch {
-        // sessiz fallback
-      }
+      } catch {}
 
       return null;
     }
 
-    function getIntent(normalized, rawText) {
+    function analyzeNeedForWeb(normalized, intent, localAnswerExists) {
+      const webSignals = /(son durum|guncel|haber|bugun|fiyat|hava durumu|kim kazandi|mac sonucu|nedir|kimdir|nerede|kac)/.test(normalized);
+      const unknownTopic = /(mars|uzay|ulkeler|tarihce|bilim|teknoloji|saglik|ekonomi)/.test(normalized) && !localAnswerExists;
+      return intent === 'web_search' || (!localAnswerExists && (webSignals || unknownTopic));
+    }
+
+    function detectIntent(normalized, rawText) {
       if (/^(selam|merhaba|hey|iyi gunler)/.test(normalized)) return 'greet';
       if (/(nasilsin|naber|iyi misin)/.test(normalized)) return 'mood';
       if (/(saat kac|suan saat|kacta)/.test(normalized)) return 'time';
@@ -340,70 +322,79 @@
       if (parseUserName(rawText)) return 'set_name';
       if (/(hesapla|kac eder|\d+\s*[+\-*/])/.test(normalized)) return 'calculate';
       if (/(javascript|python|yapay zeka|turkiye)/.test(normalized)) return 'knowledge';
-      if (needsWebSearch(normalized)) return 'web_search';
+      if (/(arastir|ara|search|googlela)/.test(normalized)) return 'web_search';
       return 'fallback';
     }
 
-    async function replyTo(rawText) {
+    async function think(rawText) {
       const normalized = normalizeText(rawText);
-      const intent = getIntent(normalized, rawText);
-      memory.lastQuestion = rawText;
+      const intent = detectIntent(normalized, rawText);
+      Brain.memory.lastQuestion = rawText;
 
       if (intent === 'set_name') {
         const found = parseUserName(rawText);
-        memory.userName = found;
-        return `Memnun oldum ${found}! İsminizi hatırlayacağım.`;
+        Brain.memory.userName = found;
+        Brain.memory.lastAnswerSource = 'local';
+        return `Memnun oldum ${found}! Adınızı hafızama kaydettim.`;
       }
 
       if (intent === 'recall_name') {
-        return memory.userName
-          ? `Evet, adınızı hatırlıyorum: ${memory.userName}.`
-          : 'Henüz adınızı söylemediniz. "Benim adım ..." diye yazabilirsiniz.';
+        Brain.memory.lastAnswerSource = 'local';
+        return Brain.memory.userName
+          ? `Evet, adınızı hatırlıyorum: ${Brain.memory.userName}.`
+          : 'Henüz adınızı söylemediniz. "Benim adım ..." yazabilirsiniz.';
       }
 
-      if (intent === 'greet') return `Merhaba${memory.userName ? ' ' + memory.userName : ''}! Ben Hakan ÇELİK. Size yardımcı olmaya hazırım.`;
-      if (intent === 'mood') return 'Harikayım, teşekkür ederim! İsterseniz bir konu seçin, birlikte ilerleyelim.';
+      if (intent === 'greet') return `Merhaba${Brain.memory.userName ? ' ' + Brain.memory.userName : ''}! Ben Hakan ÇELİK.`;
+      if (intent === 'mood') return 'İyiyim, teşekkür ederim! Sorunuza odaklanıp en uygun cevabı bulurum.';
       if (intent === 'time') return `Şu an saat ${new Date().toLocaleTimeString('tr-TR')}.`;
       if (intent === 'date') return `Bugünün tarihi: ${new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}.`;
 
       if (intent === 'help') {
-        return 'Yapabildiklerim:\n• Gelişmiş sohbet ve niyet algılama\n• Adınızı hatırlama\n• Saat/tarih\n• Basit matematik\n• Dosya/fotoğraf ekleme\n• Gerektiğinde internetten bilgi özeti + arama motoru bağlantısı';
+        return 'Yapabildiklerim:\n• Soruyu analiz edip internet gerekip gerekmediğine kendim karar veririm\n• Gerekirse internetten bulduğum cevabı burada gösteririm\n• Adınızı hatırlarım, saat/tarih söylerim, hesaplama yaparım\n• Dosya/fotoğraf yüklemeyi desteklerim';
       }
 
-      if (intent === 'motivation') return randomFrom(answerPools.motivation);
-      if (intent === 'joke') return 'Yapay zekaya "neden geç kaldın" demişler; "cache temizliyordum" demiş. 😄';
+      if (intent === 'motivation') return randomFrom(Brain.answerPools.motivation);
+      if (intent === 'joke') return 'Robotlara neden kahve verilmez? Zaten Java ile çalışıyorlar. 😄';
 
       if (intent === 'calculate') {
         const calc = calculateExpression(normalized);
-        return calc ?? 'İşlem göremedim. Örnek: "(12+8)/2 kaç eder" yazabilirsiniz.';
+        return calc ?? 'İşlem göremedim. Örn: (12+8)/2 kaç eder?';
       }
 
+      let localAnswer = null;
       if (intent === 'knowledge') {
-        for (const key of Object.keys(knowledge)) {
+        for (const key of Object.keys(Brain.knowledge)) {
           if (normalized.includes(key)) {
-            memory.lastTopic = key;
-            return knowledge[key];
+            Brain.memory.lastTopic = key;
+            localAnswer = Brain.knowledge[key];
+            break;
           }
         }
       }
 
-      if ((/daha fazla|detay|ac/.test(normalized)) && memory.lastTopic && knowledge[memory.lastTopic]) {
-        return `${knowledge[memory.lastTopic]}\nDetay isterseniz internetten güncel bilgi de çekebilirim.`;
+      if (!localAnswer && /daha fazla|detay|ac/.test(normalized) && Brain.memory.lastTopic) {
+        localAnswer = `${Brain.knowledge[Brain.memory.lastTopic]}\nİsterseniz güncel bilgi için ayrıca internetten de tarayabilirim.`;
       }
 
-      if ((intent === 'web_search' || webMode.checked) && rawText.length > 3) {
+      const shouldUseWeb = analyzeNeedForWeb(normalized, intent, Boolean(localAnswer));
+      if (shouldUseWeb) {
         const cleanedQuery = rawText.replace(/^(ara[şs]t[ıi]r|ara|search|googlela)\s*:?/i, '').trim() || rawText;
-        const summary = await getWebSummary(cleanedQuery);
-        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(cleanedQuery)}`;
-        window.open(searchUrl, '_blank', 'noopener');
-
-        if (summary) {
-          return `İnternette kısa araştırma yaptım (${summary.source}):\n${summary.text}\n\nAyrıca detay için arama motorunu açtım: ${searchUrl}`;
+        const web = await fetchWebSummary(cleanedQuery);
+        Brain.memory.lastAnswerSource = 'web';
+        if (web) {
+          return `Sorunuzu analiz ettim ve internetten araştırma gerektiğine karar verdim.\n\nKaynak: ${web.source}\nCevap: ${web.text}\nKaynak bağlantısı: ${web.link}`;
         }
-        return `Sorunuz için arama motorunu açtım: ${searchUrl}\nİsterseniz bulduğunuz sonuçlara göre birlikte özet çıkarabilirim.`;
+        return 'Sorunuz için internette arama denedim ancak kısa özet çekemedim. İnternet bağlantınızı kontrol edip tekrar deneyebiliriz.';
       }
 
-      return randomFrom(answerPools.fallback);
+      if (localAnswer) {
+        Brain.memory.lastAnswerSource = 'local';
+        return localAnswer;
+      }
+
+      Brain.memory.lastAnswerSource = 'local';
+      return randomFrom(Brain.answerPools.fallback);
     }
 
     async function sendMessage(text) {
@@ -413,7 +404,7 @@
       fileInput.value = '';
 
       typing.style.display = 'block';
-      const response = await replyTo(text);
+      const response = await think(text);
       typing.style.display = 'none';
       addMessage(response, 'bot');
     }
@@ -425,7 +416,7 @@
       addMessage(`Yüklenecek dosyalar hazır:\n${names}`, 'bot');
     }
 
-    addMessage('Merhaba! Ben Hakan ÇELİK. Sorularınızı daha iyi anlayıp gerekirse internet aramasıyla destekleyebilirim.', 'bot');
+    addMessage('Merhaba! Ben Hakan ÇELİK. Sorunuza göre internet araması gerekip gerekmediğine kendim karar veririm ve sonucu burada gösteririm.', 'bot');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
