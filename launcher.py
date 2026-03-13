@@ -4,6 +4,26 @@ from __future__ import annotations
 import json
 import random
 import re
+try:
+    import requests
+except Exception:  # fallback shim
+    import urllib.request
+
+    class _Resp:
+        def __init__(self, code: int, text: str):
+            self.status_code = code
+            self._text = text
+
+        def json(self):
+            return json.loads(self._text)
+
+    class requests:  # type: ignore
+        @staticmethod
+        def post(url, json=None, timeout=45):
+            data = __import__("json").dumps(json or {}).encode("utf-8")
+            req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"}, method="POST")
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return _Resp(r.getcode(), r.read().decode("utf-8"))
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -18,6 +38,8 @@ MEMORY_FILE = BASE_DIR / ".hakan_memory.json"
 MAX_HISTORY = 10
 HOST = "0.0.0.0"
 PORT = 8000
+OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_MODEL = "llama3"
 
 
 @dataclass
@@ -167,37 +189,91 @@ def _persist_all() -> None:
     _save_memories({sid: asdict(state) for sid, state in SESSION_STORE.items()})
 
 
+def _build_prompt(message: str, state: SessionState, intent: str, chunks: list[dict[str, str]]) -> str:
+    history_lines = []
+    for item in state.history[-(MAX_HISTORY * 2):]:
+        role = "Kullanıcı" if item["role"] == "user" else "Asistan"
+        history_lines.append(f"{role}: {item['content']}")
+    history_text = "\n".join(history_lines) if history_lines else "(geçmiş yok)"
+
+    kb_text = "\n".join(f"- {c['text']}" for c in chunks) if chunks else "(ilgili bilgi bulunamadı)"
+
+    return f"""Sen Hakan ÇELİK isimli Türkçe konuşan yardımcı AI asistansın.
+- Kısa, net ve faydalı cevap ver.
+- Kullanıcının niyetini dikkate al (intent: {intent}).
+- Uydurma bilgi verme; varsa verilen bilgi tabanını kullan.
+- Cevabında debug/teknik etiketler veya [Niyet analizi: ...] gibi metinler kullanma.
+
+Kullanıcı profili:
+- Ad: {state.name or 'bilinmiyor'}
+- Hedef: {state.goal or 'bilinmiyor'}
+- Duygu durumu: {state.mood or 'bilinmiyor'}
+- Tercihler: {', '.join(state.preferences[-3:]) if state.preferences else 'yok'}
+
+Son konuşma bağlamı:
+{history_text}
+
+Bilgi tabanı alıntıları (RAG):
+{kb_text}
+
+Yeni kullanıcı mesajı:
+{message}
+
+Sadece nihai cevabı üret."""
+
+
+def _call_ollama(prompt: str) -> str | None:
+    try:
+        response = requests.post(
+            OLLAMA_URL,
+            json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False},
+            timeout=45,
+        )
+        if response.status_code != 200:
+            return None
+        data = response.json()
+        text = str(data.get("response", "")).strip()
+        return text or None
+    except Exception:
+        return None
+
+
+def _fallback_reply(message: str, intent: str, state: SessionState, chunks: list[dict[str, str]]) -> str:
+    if intent == "memory":
+        return f"Evet, seni hatırlıyorum. Adın: {state.name or 'henüz paylaşılmadı'}. Son hedefin: {state.goal or 'henüz kaydedilmedi'}."
+    if intent == "calculation":
+        return _calculate(message) or "Hesaplama için bir ifade göremedim."
+    if intent == "planning":
+        return "Bunu 3 adımda planlayalım:\n1) Net hedefi tek cümleye indir.\n2) İlk 25 dakikalık görevi seç.\n3) Bittiğinde sonucu yaz, bir sonraki adımı optimize edelim."
+    if intent == "decision":
+        return "Kararı netleştirmek için A/B seçeneklerini yaz. Her biri için + fayda / - maliyet / risk puanı ver."
+    if intent == "emotional":
+        return "Seni anlıyorum. Önce 4-4-6 nefes döngüsü yap, sonra tek bir küçük göreve odaklanalım."
+    if chunks:
+        return "Sorunu buna göre yorumladım:\n" + "\n".join(f"- {c['text']}" for c in chunks[:2])
+    return "Sorunu anladım. Biraz daha hedefini yazarsan daha güçlü cevap verebilirim."
+
+
 def _reason_and_respond(message: str, state: SessionState) -> tuple[str, str, float, list[dict[str, str]]]:
     intent, confidence = _pick_intent(message)
     chunks = _rank_relevant_chunks(message)
+
     name = _extract_name(message)
     if name:
         state.name = name
     if "severim" in _normalize(message) or "tercih" in _normalize(message):
         state.preferences.append(message[:120])
         state.preferences = state.preferences[-8:]
+    if intent == "planning":
+        state.goal = message
+    if intent == "emotional":
+        state.mood = "destek_istiyor"
+
+    prompt = _build_prompt(message, state, intent, chunks)
+    llm_answer = _call_ollama(prompt)
+    answer = llm_answer or _fallback_reply(message, intent, state, chunks)
 
     reasoning_summary = f"Niyet analizi: {intent}, güven: %{round(confidence * 100)}"
-
-    if intent == "memory":
-        answer = f"Evet, seni hatırlıyorum. Adın: {state.name or 'henüz paylaşılmadı'}. Son hedefin: {state.goal or 'henüz kaydedilmedi'}."
-    elif intent == "calculation":
-        answer = _calculate(message) or "Hesaplama için bir ifade göremedim."
-    elif intent == "planning":
-        state.goal = message
-        answer = "Bunu 3 adımda planlayalım:\n1) Net hedefi tek cümleye indir.\n2) İlk 25 dakikalık görevi seç.\n3) Bittiğinde sonucu yaz, bir sonraki adımı optimize edelim."
-    elif intent == "decision":
-        answer = "Kararı netleştirmek için A/B seçeneklerini yaz.\nHer biri için: + fayda / - maliyet / risk puanı ver (1-10).\nEn yüksek net puanlı seçeneği 24 saat test et."
-    elif intent == "emotional":
-        state.mood = "destek_istiyor"
-        answer = "Seni anlıyorum. Önce sistemi sakinleştirelim:\n• 4-4-6 nefes döngüsü (5 tur)\n• Sonra tek bir küçük görev seç\n• 10 dakika odaklanıp geri dön"
-    else:
-        if chunks:
-            joined = "\n".join(f"- {c['text']}" for c in chunks[:2])
-            answer = f"Sorunu buna göre yorumladım:\n{joined}\n\nİstersen bunu daha teknik veya daha sade anlatabilirim."
-        else:
-            answer = "Sorunu anladım. Biraz daha hedefini yazarsan daha güçlü ve kişiselleştirilmiş cevap verebilirim."
-
     state.last_intent = intent
     state.updated_at = datetime.now().isoformat(timespec="seconds")
     state.history.append({"role": "user", "content": message})
