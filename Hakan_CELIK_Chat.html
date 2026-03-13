@@ -132,8 +132,7 @@
       if (!res.ok) throw new Error('chat');
       const data = await res.json();
       const sourceText = data.sources?.length ? `\n\nKaynaklar: ${data.sources.map((s) => s.source).join(', ')}` : '';
-      const meta = `\n\n[${data.reasoning_summary} | güven=${data.confidence}]`;
-      addMessage(`${data.reply}${sourceText}${meta}`, 'assistant');
+      addMessage(`${data.reply}${sourceText}`, 'assistant');
       await refreshMemory();
     } catch {
       addMessage('Sunucuya bağlanamadım. `python launcher.py` ile API sunucusunu başlatıp tekrar dener misin?', 'assistant');
