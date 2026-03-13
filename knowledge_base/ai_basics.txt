@@ -1,0 +1,4 @@
+Yapay zeka, bilgisayar sistemlerinin öğrenme, çıkarım yapma ve karar verme gibi görevleri gerçekleştirmesini amaçlayan bir alandır.
+Doğal dil işleme (NLP), metinleri ve konuşmaları anlamak için kullanılan yöntemleri kapsar.
+Bağlam yönetimi (context management), önceki mesajlardan anlam çıkararak daha tutarlı yanıt üretmeyi sağlar.
+Kısa süreli bellek, konuşmanın son bölümlerini aktif olarak tutup yeni yanıta dahil eder.
